@@ -22,7 +22,6 @@ class Migration(SchemaMigration):
         # Deleting model 'CheckedToken'
         db.delete_table(u'bb_token_auth_checkedtoken')
 
-
     models = {
         u'auth.group': {
             'Meta': {'object_name': 'Group'},

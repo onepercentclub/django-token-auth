@@ -1,9 +1,6 @@
 from django.conf import settings
 from django.db import models
 
-from bluebottle.bb_tasks import taskmail
-from bluebottle.wallposts import mails
-
 
 class CheckedToken(models.Model):
     """

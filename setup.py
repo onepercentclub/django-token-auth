@@ -23,6 +23,8 @@ setuptools.setup(
         'Django==1.6.8',
     ],
     tests_require=[
+        'django_nose==1.4',
+        'pycrypto==2.6.1'
     ],
     test_suite = "runtests.runtests",
     classifiers=[

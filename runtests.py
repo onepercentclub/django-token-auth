@@ -8,6 +8,7 @@ if not settings.configured:
     settings.configure(
         DATABASES={'default': {'ENGINE': 'django.db.backends.sqlite3'}},
         INSTALLED_APPS=[
+            'django.contrib.auth',
             'tests',
             'django_nose',
         ],

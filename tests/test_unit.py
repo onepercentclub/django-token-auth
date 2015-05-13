@@ -8,9 +8,10 @@ from Crypto import Random
 from django.conf import settings
 from django.test import TestCase
 from django.test.utils import override_settings
+from django.db import connection
 
-from ..auth import BookingTokenAuthentication, TokenAuthenticationError
-from ..models import CheckedToken
+from bb_token_auth.auth import BookingTokenAuthentication, TokenAuthenticationError
+from bb_token_auth.models import CheckedToken
 from .factories import CheckedTokenFactory
 
 
@@ -67,7 +68,7 @@ class TestBookingTokenAuthentication(TestCase):
         returns True when it is a valid signature.
         """
         message = base64.urlsafe_b64decode(self.checked_token.token)
-
+        print message
         self.assertTrue(self.auth_backend.check_hmac_signature(message))
 
     def test_check_hmac_signature_wrong(self):
@@ -208,5 +209,4 @@ class TestBookingTokenAuthentication(TestCase):
         checked_token = CheckedToken.objects.latest('pk')
         self.assertEqual(checked_token.token, token)
         self.assertEqual(checked_token.user, user)
-        # self.assertEqual(checked_token.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
         #                  timestamp)
