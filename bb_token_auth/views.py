@@ -32,7 +32,7 @@ class TokenLoginView(View):
 class TokenErrorView(TemplateView):
 
     query_string = True
-    template_name = 'core/token-error.tpl'
+    template_name = 'token/token-error.tpl'
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
@@ -43,7 +43,7 @@ class TokenErrorView(TemplateView):
 class MembersOnlyView(TemplateView):
 
     query_string = True
-    template_name = 'core/members-only.tpl'
+    template_name = 'token/members-only.tpl'
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)

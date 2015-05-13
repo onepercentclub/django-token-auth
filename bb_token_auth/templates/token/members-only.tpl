@@ -1,4 +1,4 @@
-{% extends 'error.html' %}
+{% extends 'token/base.tpl' %}
 {% load static %}
 
 {% block content %}

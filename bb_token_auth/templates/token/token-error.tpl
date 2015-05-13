@@ -1,9 +1,11 @@
-{% extends 'error.html' %}
+{% extends 'token/base.tpl' %}
 
-<h1>Error loging in</h1>
+{% block content %}
+    <h1>Error loging in</h1>
 
-Server said: {{message}}
+    Server said: {{message}}
 
-<br />
-<br />
-Go back to <a href='https://office.booking.com/staff/booking_cares.html'>https://office.booking.com/staff/booking_cares.html</a> and try to log in again.
+    <br />
+    <br />
+    Go back to <a href='https://office.booking.com/staff/booking_cares.html'>https://office.booking.com/staff/booking_cares.html</a> and try to log in again.
+{% endblock %}

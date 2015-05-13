@@ -2,6 +2,7 @@
 {% load bb_ember %}
 {% load compress %}
 {% load static %}
+{% load tenant_static %}
 
 <!DOCTYPE HTML>
 <html lang="{{ LANGUAGE_CODE }}">
@@ -22,18 +23,21 @@
     {% endblock defaults_js %}
 
     {% block meta %}
-        <meta name="description" content="Booking Cares is the place to get together with the common goal of improving our destinations." />
-        <meta name="keywords" content="crowdsourcing, time, skills, colleagues, teamwork, destinations, improvement, tourism" />
-        <meta name='author' content="Booking Cares">
+        <meta name="description" content="{% blocktrans %}1%Club is the global crowdfunding and crowdsourcing platform where you can share a little and change the world, in your very own way. Pick any project you like, support it with 1% of your knowledge, money or time and follow the progress online.{% endblocktrans %}" />
+        <meta name="author" content="{% blocktrans %}1%Club{% endblocktrans %}" />
+        <meta name="keywords" content="{% blocktrans %}crowdfunding, crowdsourcing, platform, developing countries, time, skills, money, doneren, international cooperation, charity{% endblocktrans %}" />
         <link rel="shortcut icon" href="{% static 'favicon.ico' %}">
     {% endblock %}
 
     {# Stylesheets #}
-    {% block screen_css %}  
-        <link rel="stylesheet" href="{% static 'css/screen.css' %}" type="text/css" media="screen">
-    {% endblock %}
+	{% block screen_css %}
+        <link rel="stylesheet" href="{% tenant_static 'css/main.css' %}" media="screen" />
+        <link rel="stylesheet" href="{% static 'vendor/css/redactor.css' %}" media="screen" />
+	{% endblock %}
 </head>
 <body id="body">
-    {% block content %}{% endblock %}
+    {% block content %}
+        Token
+    {% endblock %}
 </body>
 </html>
