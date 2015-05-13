@@ -10,8 +10,8 @@ from django.test import TestCase
 from django.test.utils import override_settings
 from django.db import connection
 
-from bb_token_auth.auth import BookingTokenAuthentication, TokenAuthenticationError
-from bb_token_auth.models import CheckedToken
+from token_auth.auth import BookingTokenAuthentication, TokenAuthenticationError
+from token_auth.models import CheckedToken
 from .factories import CheckedTokenFactory
 
 

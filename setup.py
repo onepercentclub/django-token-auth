@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import os
 import setuptools
-import bb_token_auth
+import token_auth
 
 with open(os.path.join(os.path.dirname(__file__), 'README.md')) as readme:
     README = readme.read()
@@ -9,8 +9,8 @@ with open(os.path.join(os.path.dirname(__file__), 'README.md')) as readme:
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setuptools.setup(
-    name="bb-token-auth",
-    version=bb_token_auth.__version__,
+    name="django-token-auth",
+    version=token_auth.__version__,
     packages=setuptools.find_packages(),
     include_package_data=True,
     license='None',
@@ -24,6 +24,7 @@ setuptools.setup(
     ],
     tests_require=[
         'django_nose==1.4',
+        'factory-boy==2.3.1',
         'pycrypto==2.6.1'
     ],
     test_suite = "runtests.runtests",

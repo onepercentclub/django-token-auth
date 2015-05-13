@@ -4,13 +4,11 @@ import factory
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 
-from ..models import CheckedToken
-
-AUTH_USER_MODEL = get_user_model()
+from token_auth.models import CheckedToken
 
 
-class BlueBottleUserFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = AUTH_USER_MODEL
+class UserFactory(factory.DjangoModelFactory):
+    FACTORY_FOR = get_user_model()
 
     username = 'rterkuile'
     first_name = 'Renko'
@@ -29,4 +27,4 @@ class CheckedTokenFactory(factory.DjangoModelFactory):
             'qFbvwTBxg=='
     timestamp = datetime.datetime(2012, 12, 18, 11, 51, 15).replace(
         tzinfo=timezone.get_current_timezone())
-    user = factory.SubFactory(BlueBottleUserFactory)
+    user = factory.SubFactory(UserFactory)
