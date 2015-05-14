@@ -143,9 +143,6 @@ class TokenAuthentication(object):
 
         email = login_data[3].strip()
         email = filter(lambda x: x in string.printable, email)
-
-        # Good token! Let the user log in, but first store the token to
-        # compare with next ones.
         user, created = USER_MODEL.objects.get_or_create(email=email)
 
         username = login_data[1]
@@ -156,14 +153,13 @@ class TokenAuthentication(object):
             counter += 1
 
         user.username = username
+        user.is_active = True
 
         name = login_data[2].strip()
         user.first_name = name.split(' ').pop(0)
         parts = name.split(' ')
         parts.pop(0)
         user.last_name = " ".join(parts)
-
-
         user.save()
 
         checked_token = CheckedToken.objects.create(token=token, timestamp=timestamp, user=user)
