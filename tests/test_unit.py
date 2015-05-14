@@ -10,15 +10,15 @@ from django.test import TestCase
 from django.test.utils import override_settings
 from django.db import connection
 
-from token_auth.auth import BookingTokenAuthentication, TokenAuthenticationError
+from token_auth.auth import TokenAuthentication, TokenAuthenticationError
 from token_auth.models import CheckedToken
 from .factories import CheckedTokenFactory
 from token_auth.utils import get_token_settings
 
 
-class TestBookingTokenAuthentication(TestCase):
+class TestTokenAuthentication(TestCase):
     """
-    Tests the Booking token authentication backend.
+    Tests the Token Authentication backend.
     """
     @override_settings(
         TOKEN_AUTH = {
@@ -29,7 +29,7 @@ class TestBookingTokenAuthentication(TestCase):
     )
     def setUp(self):
         # import ipdb; ipdb.set_trace()
-        self.auth_backend = BookingTokenAuthentication()
+        self.auth_backend = TokenAuthentication()
         self.checked_token = CheckedTokenFactory.create()
         self.data = 'time=2013-12-23 17:51:15|username=johndoe|name=John Doe' \
                     '|email=john.doe@booking.com'
@@ -207,10 +207,8 @@ class TestBookingTokenAuthentication(TestCase):
         # Check created user data.
         self.assertEqual(user.username, 'johndoe')
         self.assertEqual(user.is_active, True)
-        self.assertEqual(user.primary_language, settings.LANGUAGE_CODE)
 
         # Check `CheckedToken` related object.
         checked_token = CheckedToken.objects.latest('pk')
         self.assertEqual(checked_token.token, token)
         self.assertEqual(checked_token.user, user)
-        #                  timestamp)

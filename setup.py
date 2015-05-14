@@ -13,7 +13,7 @@ setuptools.setup(
     version=token_auth.__version__,
     packages=setuptools.find_packages(),
     include_package_data=True,
-    license='None',
+    license='BSD',
     description='Token Authentication for Bluebottle',
     long_description=README,
     url="http://onepercentclub.com",

@@ -157,9 +157,12 @@ class TokenAuthentication(object):
 
         user.username = username
 
-        if created:
-            user.primary_language = settings.LANGUAGE_CODE
-            user.is_active = True
+        name = login_data[2].strip()
+        user.first_name = name.split(' ').pop(0)
+        parts = name.split(' ')
+        parts.pop(0)
+        user.last_name = " ".join(parts)
+
 
         user.save()
 
