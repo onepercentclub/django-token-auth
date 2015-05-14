@@ -4,17 +4,16 @@ from django.http.response import HttpResponseRedirect, HttpResponse
 
 from django.views.generic.base import View, TemplateView
 
-from auth import TokenAuthenticationError, BookingTokenAuthentication
+from auth import TokenAuthenticationError, TokenAuthentication
 
 
 class TokenLoginView(View):
 
     def get(self, request, *args, **kwargs):
         token = kwargs['token']
-
         link = kwargs.get('link')
 
-        auth = BookingTokenAuthentication()
+        auth = TokenAuthentication()
         try:
             user, created = auth.authenticate(token)
             user.backend = 'django.contrib.auth.backends.ModelBackend'

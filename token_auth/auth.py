@@ -16,7 +16,7 @@ from token_auth.utils import get_token_settings
 
 logger = logging.getLogger(__name__)
 
-BB_USER_MODEL = get_user_model()
+USER_MODEL = get_user_model()
 
 
 class TokenAuthenticationError(Exception):
@@ -30,7 +30,7 @@ class TokenAuthenticationError(Exception):
         return repr(self.value)
 
 
-class BookingTokenAuthentication(object):
+class TokenAuthentication(object):
     """
     This authentication backend expects a token, encoded in URL-safe Base64, to
     be received from the user to be authenticated. The token must be built like
@@ -146,11 +146,11 @@ class BookingTokenAuthentication(object):
 
         # Good token! Let the user log in, but first store the token to
         # compare with next ones.
-        user, created = BB_USER_MODEL.objects.get_or_create(email=email)
+        user, created = USER_MODEL.objects.get_or_create(email=email)
 
         username = login_data[1]
         counter = 1
-        qs = BB_USER_MODEL.objects
+        qs = USER_MODEL.objects
         while qs.filter(username=username).exists():
             username = '{0}-{1}'.format(username, counter)
             counter += 1
@@ -169,6 +169,6 @@ class BookingTokenAuthentication(object):
 
     def get_user(self, user_id):
         try:
-            return BB_USER_MODEL.objects.get(pk=user_id)
-        except BB_USER_MODEL.DoesNotExist:
+            return USER_MODEL.objects.get(pk=user_id)
+        except USER_MODEL.DoesNotExist:
             return None
