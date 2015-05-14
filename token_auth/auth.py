@@ -12,6 +12,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 
 from .models import CheckedToken
+from token_auth.utils import get_token_settings
 
 logger = logging.getLogger(__name__)
 
@@ -52,15 +53,9 @@ class BookingTokenAuthentication(object):
     expired or if its finally valid.
     """
     def __init__(self):
-        try:
-            from bluebottle.clients import properties
-            self.aes_key = properties.AUTH_AES_KEY
-            self.hmac_key = properties.AUTH_HMAC_KEY
-            self.expiration_date = properties.AUTH_TOKEN_EXPIRATION
-        except ImportError:
-            self.aes_key = settings.AUTH_AES_KEY
-            self.hmac_key = settings.AUTH_HMAC_KEY
-            self.expiration_date = settings.AUTH_TOKEN_EXPIRATION
+        self.aes_key = get_token_settings('aes_key')
+        self.hmac_key = get_token_settings('hmac_key')
+        self.expiration_date = get_token_settings('token_expiration')
 
     def check_hmac_signature(self, message):
         """

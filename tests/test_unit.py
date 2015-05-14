@@ -13,6 +13,7 @@ from django.db import connection
 from token_auth.auth import BookingTokenAuthentication, TokenAuthenticationError
 from token_auth.models import CheckedToken
 from .factories import CheckedTokenFactory
+from token_auth.utils import get_token_settings
 
 
 class TestBookingTokenAuthentication(TestCase):
@@ -20,9 +21,12 @@ class TestBookingTokenAuthentication(TestCase):
     Tests the Booking token authentication backend.
     """
     @override_settings(
-        AUTH_HMAC_KEY='bbbbbbbbbbbbbbbb',
-        AUTH_AES_KEY='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-        AUTH_TOKEN_EXPIRATION=30)
+        TOKEN_AUTH = {
+            'token_expiration': 600,
+            'hmac_key': 'bbbbbbbbbbbbbbbb',
+            'aes_key': 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+        }
+    )
     def setUp(self):
         # import ipdb; ipdb.set_trace()
         self.auth_backend = BookingTokenAuthentication()
@@ -39,8 +43,8 @@ class TestBookingTokenAuthentication(TestCase):
         self.corrupt_token = token
 
         # Get the new security keys to use it around in the tests.
-        self.hmac_key = settings.AUTH_HMAC_KEY
-        self.aes_key = settings.AUTH_AES_KEY
+        self.hmac_key = get_token_settings('hmac_key')
+        self.aes_key = get_token_settings('aes_key')
 
     def _encode_message(self, message):
         """
