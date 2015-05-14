@@ -8,20 +8,23 @@ if not settings.configured:
     settings.configure(
         DATABASES={'default': {'ENGINE': 'django.db.backends.sqlite3'}},
         USER_AUTH_MODEL='auth.User',
-        INSTALLED_APPS=[
+        SOUTH_TESTS_MIGRATE = False,
+        USE_TZ=True,
+        INSTALLED_APPS=(
+            'south',
             'django.contrib.auth',
             'django.contrib.contenttypes',
             'tests',
             'django_nose',
-            'factory'
-        ],
+            'factory',
+            'token_auth'
+        ),
         MIDDLEWARE_CLASSES=()
     )
 
 from django_nose import NoseTestSuiteRunner
 
 def runtests(*test_labels):
-    # django.setup()
     runner = NoseTestSuiteRunner(verbosity=1, interactive=True)
     failures = runner.run_tests(test_labels)
     sys.exit(failures)

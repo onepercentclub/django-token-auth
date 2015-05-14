@@ -1,3 +1,4 @@
 include LICENSE
 include README.md
-recursive-include bb_token_auth/templates/ *
+recursive-include token_auth/ *
+recursive-include token_auth/templates/ *

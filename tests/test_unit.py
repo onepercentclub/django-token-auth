@@ -24,6 +24,7 @@ class TestBookingTokenAuthentication(TestCase):
         AUTH_AES_KEY='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
         AUTH_TOKEN_EXPIRATION=30)
     def setUp(self):
+        # import ipdb; ipdb.set_trace()
         self.auth_backend = BookingTokenAuthentication()
         self.checked_token = CheckedTokenFactory.create()
         self.data = 'time=2013-12-23 17:51:15|username=johndoe|name=John Doe' \
