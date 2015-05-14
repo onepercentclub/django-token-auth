@@ -161,7 +161,6 @@ class BookingTokenAuthentication(object):
             counter += 1
 
         user.username = username
-        user.full_name = login_data[2]
 
         if created:
             user.primary_language = settings.LANGUAGE_CODE

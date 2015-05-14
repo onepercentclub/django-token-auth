@@ -69,7 +69,6 @@ class TestBookingTokenAuthentication(TestCase):
         returns True when it is a valid signature.
         """
         message = base64.urlsafe_b64decode(self.checked_token.token)
-        print message
         self.assertTrue(self.auth_backend.check_hmac_signature(message))
 
     def test_check_hmac_signature_wrong(self):
