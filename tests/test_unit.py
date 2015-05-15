@@ -32,7 +32,7 @@ class TestTokenAuthentication(TestCase):
         self.auth_backend = TokenAuthentication()
         self.checked_token = CheckedTokenFactory.create()
         self.data = 'time=2013-12-23 17:51:15|username=johndoe|name=John Doe' \
-                    '|email=john.doe@booking.com'
+                    '|email=john.doe@example.com'
 
         # To keep things easy, let's just change the valid token to put some Xs
         # on it at the beginning of each of those lines.
@@ -106,7 +106,7 @@ class TestTokenAuthentication(TestCase):
                 '2013-12-23 17:51:15',
                 'johndoe',
                 'John Doe',
-                'john.doe@booking.com'
+                'john.doe@example.com'
             ))
 
     def test_check_timestamp_valid_token(self):
@@ -165,7 +165,7 @@ class TestTokenAuthentication(TestCase):
         so the message contained in the token was not as expected.
         """
         message = 'xxxx=2013-12-18 11:51:15|xxxxxxxx=johndoe|xxxx=John Doe|' \
-                  'xxxxx=john.doe@booking.com'
+                  'xxxxx=john.doe@example.com'
         aes_message, hmac_digest = self._encode_message(message)
         token = base64.urlsafe_b64encode(aes_message + hmac_digest.digest())
 
@@ -182,7 +182,7 @@ class TestTokenAuthentication(TestCase):
         """
         # Set up a token with an old date (year 2012).
         message = 'time=2012-12-18 11:51:15|username=johndoe|name=John Doe|' \
-                  'email=john.doe@booking.com'
+                  'email=john.doe@example.com'
         aes_message, hmac_digest = self._encode_message(message)
         token = base64.urlsafe_b64encode(aes_message + hmac_digest.digest())
 
@@ -198,7 +198,7 @@ class TestTokenAuthentication(TestCase):
         """
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         message = 'time={0}|username=johndoe|name=John Doe|' \
-                  'email=john.doe@booking.com'.format(timestamp)
+                  'email=john.doe@example.com'.format(timestamp)
         aes_message, hmac_digest = self._encode_message(message)
         token = base64.urlsafe_b64encode(aes_message + hmac_digest.digest())
 

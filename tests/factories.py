@@ -13,7 +13,7 @@ class UserFactory(factory.DjangoModelFactory):
     username = 'rterkuile'
     first_name = 'Renko'
     last_name = 'ter Kuile'
-    email = 'renko.terkuile@booking.com'
+    email = 'renko.terkuile@example.com'
 
 
 class CheckedTokenFactory(factory.DjangoModelFactory):
