@@ -12,10 +12,11 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 
 from .models import CheckedToken
+from token_auth.utils import get_token_settings
 
 logger = logging.getLogger(__name__)
 
-BB_USER_MODEL = get_user_model()
+USER_MODEL = get_user_model()
 
 
 class TokenAuthenticationError(Exception):
@@ -29,7 +30,7 @@ class TokenAuthenticationError(Exception):
         return repr(self.value)
 
 
-class BookingTokenAuthentication(object):
+class TokenAuthentication(object):
     """
     This authentication backend expects a token, encoded in URL-safe Base64, to
     be received from the user to be authenticated. The token must be built like
@@ -52,9 +53,9 @@ class BookingTokenAuthentication(object):
     expired or if its finally valid.
     """
     def __init__(self):
-        self.aes_key = settings.AUTH_AES_KEY
-        self.hmac_key = settings.AUTH_HMAC_KEY
-        self.expiration_date = settings.AUTH_TOKEN_EXPIRATION
+        self.aes_key = get_token_settings('aes_key')
+        self.hmac_key = get_token_settings('hmac_key')
+        self.expiration_date = get_token_settings('token_expiration')
 
     def check_hmac_signature(self, message):
         """
@@ -142,25 +143,23 @@ class BookingTokenAuthentication(object):
 
         email = login_data[3].strip()
         email = filter(lambda x: x in string.printable, email)
-
-        # Good token! Let the user log in, but first store the token to
-        # compare with next ones.
-        user, created = BB_USER_MODEL.objects.get_or_create(email=email)
+        user, created = USER_MODEL.objects.get_or_create(email=email)
 
         username = login_data[1]
         counter = 1
-        qs = BB_USER_MODEL.objects
+        qs = USER_MODEL.objects
         while qs.filter(username=username).exists():
             username = '{0}-{1}'.format(username, counter)
             counter += 1
 
         user.username = username
-        user.full_name = login_data[2]
+        user.is_active = True
 
-        if created:
-            user.primary_language = settings.LANGUAGE_CODE
-            user.is_active = True
-
+        name = login_data[2].strip()
+        user.first_name = name.split(' ').pop(0)
+        parts = name.split(' ')
+        parts.pop(0)
+        user.last_name = " ".join(parts)
         user.save()
 
         checked_token = CheckedToken.objects.create(token=token, timestamp=timestamp, user=user)
@@ -169,6 +168,6 @@ class BookingTokenAuthentication(object):
 
     def get_user(self, user_id):
         try:
-            return BB_USER_MODEL.objects.get(pk=user_id)
-        except BB_USER_MODEL.DoesNotExist:
+            return USER_MODEL.objects.get(pk=user_id)
+        except USER_MODEL.DoesNotExist:
             return None

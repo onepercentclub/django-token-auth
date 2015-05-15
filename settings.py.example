@@ -1,0 +1,9 @@
+# Add something like this to your project settings
+
+TOKEN_AUTH_SETTINGS = 'django.conf.settings'
+
+TOKEN_AUTH = {
+    'token_expiration': 600,
+    'hmac_key': 'bbbbbbbbbbbbbbbb',
+    'aes_key': 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+}

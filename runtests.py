@@ -25,7 +25,7 @@ if not settings.configured:
 from django_nose import NoseTestSuiteRunner
 
 def runtests(*test_labels):
-    runner = NoseTestSuiteRunner(verbosity=1, interactive=True)
+    runner = NoseTestSuiteRunner(verbosity=3, interactive=True)
     failures = runner.run_tests(test_labels)
     sys.exit(failures)
 

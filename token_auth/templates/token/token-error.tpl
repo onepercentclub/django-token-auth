@@ -1,11 +1,9 @@
 {% extends 'token/base.tpl' %}
+{% load i18n %}
 
 {% block content %}
-    <h1>Error loging in</h1>
-
-    Server said: {{message}}
-
-    <br />
-    <br />
-    Go back to <a href='https://office.booking.com/staff/booking_cares.html'>https://office.booking.com/staff/booking_cares.html</a> and try to log in again.
+    <h1>
+        {% trans "Error logging in" %}
+    </h1>
+    {{message}}
 {% endblock %}

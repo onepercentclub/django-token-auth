@@ -10,25 +10,29 @@ from django.test import TestCase
 from django.test.utils import override_settings
 from django.db import connection
 
-from token_auth.auth import BookingTokenAuthentication, TokenAuthenticationError
+from token_auth.auth import TokenAuthentication, TokenAuthenticationError
 from token_auth.models import CheckedToken
 from .factories import CheckedTokenFactory
+from token_auth.utils import get_token_settings
 
 
-class TestBookingTokenAuthentication(TestCase):
+class TestTokenAuthentication(TestCase):
     """
-    Tests the Booking token authentication backend.
+    Tests the Token Authentication backend.
     """
     @override_settings(
-        AUTH_HMAC_KEY='bbbbbbbbbbbbbbbb',
-        AUTH_AES_KEY='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-        AUTH_TOKEN_EXPIRATION=30)
+        TOKEN_AUTH = {
+            'token_expiration': 600,
+            'hmac_key': 'bbbbbbbbbbbbbbbb',
+            'aes_key': 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+        }
+    )
     def setUp(self):
         # import ipdb; ipdb.set_trace()
-        self.auth_backend = BookingTokenAuthentication()
+        self.auth_backend = TokenAuthentication()
         self.checked_token = CheckedTokenFactory.create()
         self.data = 'time=2013-12-23 17:51:15|username=johndoe|name=John Doe' \
-                    '|email=john.doe@booking.com'
+                    '|email=john.doe@example.com'
 
         # To keep things easy, let's just change the valid token to put some Xs
         # on it at the beginning of each of those lines.
@@ -39,8 +43,8 @@ class TestBookingTokenAuthentication(TestCase):
         self.corrupt_token = token
 
         # Get the new security keys to use it around in the tests.
-        self.hmac_key = settings.AUTH_HMAC_KEY
-        self.aes_key = settings.AUTH_AES_KEY
+        self.hmac_key = get_token_settings('hmac_key')
+        self.aes_key = get_token_settings('aes_key')
 
     def _encode_message(self, message):
         """
@@ -69,7 +73,6 @@ class TestBookingTokenAuthentication(TestCase):
         returns True when it is a valid signature.
         """
         message = base64.urlsafe_b64decode(self.checked_token.token)
-        print message
         self.assertTrue(self.auth_backend.check_hmac_signature(message))
 
     def test_check_hmac_signature_wrong(self):
@@ -103,7 +106,7 @@ class TestBookingTokenAuthentication(TestCase):
                 '2013-12-23 17:51:15',
                 'johndoe',
                 'John Doe',
-                'john.doe@booking.com'
+                'john.doe@example.com'
             ))
 
     def test_check_timestamp_valid_token(self):
@@ -162,7 +165,7 @@ class TestBookingTokenAuthentication(TestCase):
         so the message contained in the token was not as expected.
         """
         message = 'xxxx=2013-12-18 11:51:15|xxxxxxxx=johndoe|xxxx=John Doe|' \
-                  'xxxxx=john.doe@booking.com'
+                  'xxxxx=john.doe@example.com'
         aes_message, hmac_digest = self._encode_message(message)
         token = base64.urlsafe_b64encode(aes_message + hmac_digest.digest())
 
@@ -179,7 +182,7 @@ class TestBookingTokenAuthentication(TestCase):
         """
         # Set up a token with an old date (year 2012).
         message = 'time=2012-12-18 11:51:15|username=johndoe|name=John Doe|' \
-                  'email=john.doe@booking.com'
+                  'email=john.doe@example.com'
         aes_message, hmac_digest = self._encode_message(message)
         token = base64.urlsafe_b64encode(aes_message + hmac_digest.digest())
 
@@ -195,7 +198,7 @@ class TestBookingTokenAuthentication(TestCase):
         """
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         message = 'time={0}|username=johndoe|name=John Doe|' \
-                  'email=john.doe@booking.com'.format(timestamp)
+                  'email=john.doe@example.com'.format(timestamp)
         aes_message, hmac_digest = self._encode_message(message)
         token = base64.urlsafe_b64encode(aes_message + hmac_digest.digest())
 
@@ -204,10 +207,8 @@ class TestBookingTokenAuthentication(TestCase):
         # Check created user data.
         self.assertEqual(user.username, 'johndoe')
         self.assertEqual(user.is_active, True)
-        self.assertEqual(user.primary_language, settings.LANGUAGE_CODE)
 
         # Check `CheckedToken` related object.
         checked_token = CheckedToken.objects.latest('pk')
         self.assertEqual(checked_token.token, token)
         self.assertEqual(checked_token.user, user)
-        #                  timestamp)
