@@ -14,7 +14,6 @@ if not settings.configured:
             'south',
             'django.contrib.auth',
             'django.contrib.contenttypes',
-            'tests',
             'django_nose',
             'factory',
             'token_auth'
