@@ -28,7 +28,7 @@ setuptools.setup(
         'factory-boy==2.3.1',
         'pycrypto==2.6.1'
     ],
-    test_suite = "runtests.runtests",
+    test_suite = "token_auth.runtests.runtests",
     classifiers=[
         'Environment :: Web Environment',
         'Framework :: Django',
