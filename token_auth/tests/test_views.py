@@ -6,7 +6,7 @@ from django.core.exceptions import ImproperlyConfigured
 
 from token_auth.auth import booking
 from token_auth.exceptions import TokenAuthenticationError
-from token_auth.views import get_auth, SSORedirectView, TokenLoginView
+from token_auth.views import get_auth, TokenRedirectView, TokenLoginView
 
 
 class DummyUser(object):
@@ -51,7 +51,7 @@ class ConfigureAuthenticationClassTestCase(TestCase):
 
 class RedirectViewTestCase(TestCase):
     def setUp(self):
-        self.view = SSORedirectView()
+        self.view = TokenRedirectView()
         self.factory = RequestFactory()
 
     def test_get(self):
