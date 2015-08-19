@@ -3,58 +3,51 @@ import hashlib
 import hmac
 from datetime import datetime, timedelta
 
-import mock
-
 from Crypto.Cipher import AES
 from Crypto import Random
-from django.conf import settings
 from django.test import TestCase, RequestFactory
-from django.test.utils import override_settings
-from django.db import connection
 
-import bluebottle.clients
 
 from token_auth.exceptions import TokenAuthenticationError
 from token_auth.auth.booking import TokenAuthentication
 
 from token_auth.models import CheckedToken
 from .factories import CheckedTokenFactory
-from token_auth.utils import get_token_settings
 
-class MockBookingProperties(object):
-    TOKEN_AUTH = {
-            'token_expiration': 600,
-            'hmac_key': 'bbbbbbbbbbbbbbbb',
-            'aes_key': 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
-        }
+
+TOKEN_AUTH_SETTINGS = {
+    'backend': 'token_auth.auth.booking.TokenAuthentication',
+    'token_expiration': 600,
+    'hmac_key': 'bbbbbbbbbbbbbbbb',
+    'aes_key': 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+}
 
 
 class TestBookingTokenAuthentication(TestCase):
     """
     Tests the Token Authentication backend.
     """
-    @mock.patch.object(bluebottle.clients, 'properties', MockBookingProperties())
     def setUp(self):
-        # import ipdb; ipdb.set_trace()
-        self.request = RequestFactory().get('/api/sso/redirect')
+        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS):
+            self.request = RequestFactory().get('/api/sso/redirect')
 
-        # To keep things easy, let's just change the valid token to put some Xs
-        # on it at the beginning of each of those lines.
-        self.token = 'XbaTf5AVWkpkiACH6nNZZUVzZR0rye7rbiqrm3Qrgph5Sn3EwsFERytBwoj' \
+            # To keep things easy, let's just change the valid token to put some Xs
+            # on it at the beginning of each of those lines.
+            self.token = 'XbaTf5AVWkpkiACH6nNZZUVzZR0rye7rbiqrm3Qrgph5Sn3EwsFERytBwoj' \
                 'XaqSdISPvvc7aefusFmHDXAJbwLvCJ3N73x4whT7XPiJz7kfrFKYal6WlD8' \
                 'Xu5JZgVTmV5hdywGQkPMFT1Z7m4z1ga6Oud2KoQNhrf5cKzQ5CSdTojZmZ0' \
                 'XT24jBuwm5YUqFbvwTBxg=='
-        self.corrupt_token = self.token
+            self.corrupt_token = self.token
 
-        self.auth_backend = TokenAuthentication(self.request, token=self.token)
+            self.auth_backend = TokenAuthentication(self.request, token=self.token)
 
-        self.checked_token = CheckedTokenFactory.create()
-        self.data = 'time=2013-12-23 17:51:15|username=johndoe|name=John Doe' \
-                    '|email=john.doe@example.com'
+            self.checked_token = CheckedTokenFactory.create()
+            self.data = 'time=2013-12-23 17:51:15|username=johndoe|name=John Doe' \
+                        '|email=john.doe@example.com'
 
-        # Get the new security keys to use it around in the tests.
-        self.hmac_key = self.auth_backend.hmac_key
-        self.aes_key = self.auth_backend.aes_key
+            # Get the new security keys to use it around in the tests.
+            self.hmac_key = self.auth_backend.settings['hmac_key']
+            self.aes_key = self.auth_backend.settings['aes_key']
 
     def _encode_message(self, message):
         """
@@ -98,11 +91,18 @@ class TestBookingTokenAuthentication(TestCase):
         """
         Tests the method to decrypt the AES encoded message.
         """
-        aes_message, hmac_digest = self._encode_message(self.data)
-        message = self.auth_backend.decrypt_message(aes_message + hmac_digest.digest())
-        unpad = lambda s: s[0:-ord(s[-1])]
+        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS):
+            aes_message, hmac_digest = self._encode_message(self.data)
+            token = base64.urlsafe_b64encode(aes_message + hmac_digest.digest())
+            auth_backend = TokenAuthentication(self.request, token=token)
+            message = auth_backend.decrypt_message()
 
-        self.assertEqual(unpad(message), self.data)
+            self.assertEqual(
+                message, {'timestamp': '2013-12-23 17:51:15',
+                          'first_name': 'John',
+                          'last_name': 'Doe',
+                          'email': 'john.doe@example.com'
+                          })
 
     def test_get_login_data(self):
         """
@@ -124,111 +124,117 @@ class TestBookingTokenAuthentication(TestCase):
         Tests the method to check the login message timestamp when a good
         token is received.
         """
-        login_time = datetime.now() - timedelta(seconds=10)
-        self.assertTrue(self.auth_backend.check_timestamp(login_time))
+        login_time = (datetime.now() - timedelta(seconds=10)).strftime('%Y-%m-%d %H:%M:%S')
+        self.auth_backend.check_timestamp({'timestamp': login_time})
 
     def test_check_timestamp_timedout_token(self):
         """
         Tests the method to check the login message timestamp when a wrong
         timestamp is given.
         """
-        login_time = datetime.now() - timedelta(
-            days=self.auth_backend.expiration_date + 1)
-        self.assertFalse(self.auth_backend.check_timestamp(login_time))
+        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS):
+            login_time = (datetime.now() - timedelta(
+                days=self.auth_backend.settings['token_expiration'] + 1
+            )).strftime('%Y-%m-%d %H:%M:%S')
 
-    @mock.patch.object(bluebottle.clients, 'properties', MockBookingProperties())
+            self.assertRaises(
+                TokenAuthenticationError,
+                self.auth_backend.check_timestamp,
+                {'timestamp': login_time})
+
     def test_authenticate_fail_no_token(self):
         """
         Tests that ``authenticate`` method raises an exception when no token
         is provided.
         """
-        auth_backend = TokenAuthentication(self.request)
-        self.assertRaisesMessage(
-            TokenAuthenticationError,
-            'No token provided',
-            auth_backend.authenticate)
+        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS):
+            auth_backend = TokenAuthentication(self.request)
+            self.assertRaisesMessage(
+                TokenAuthenticationError,
+                'No token provided',
+                auth_backend.authenticate)
 
-    @mock.patch.object(bluebottle.clients, 'properties', MockBookingProperties())
     def test_authenticate_fail_token_used(self):
         """
         Tests that ``authenticate`` method raises an exception when a used
         token is provided.
         """
-        auth_backend = TokenAuthentication(self.request, token=self.checked_token.token)
+        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS):
+            auth_backend = TokenAuthentication(self.request, token=self.checked_token.token)
 
-        self.assertRaisesMessage(
-            TokenAuthenticationError,
-            'Token was already used and is not valid',
-            auth_backend.authenticate)
+            self.assertRaisesMessage(
+                TokenAuthenticationError,
+                'Token was already used and is not valid',
+                auth_backend.authenticate)
 
-    @mock.patch.object(bluebottle.clients, 'properties', MockBookingProperties())
     def test_authenticate_fail_corrupted_token(self):
         """
         Tests that ``authenticate`` method raises an exception when a corrupt
         token is received (HMAC-SHA1 checking).
         """
-        auth_backend = TokenAuthentication(self.request, token=self.corrupt_token)
-        self.assertRaisesMessage(
-            TokenAuthenticationError,
-            'HMAC authentication failed',
-            auth_backend.authenticate)
+        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS):
+            auth_backend = TokenAuthentication(self.request, token=self.corrupt_token)
+            self.assertRaisesMessage(
+                TokenAuthenticationError,
+                'HMAC authentication failed',
+                auth_backend.authenticate)
 
-    @mock.patch.object(bluebottle.clients, 'properties', MockBookingProperties())
     def test_authenticate_fail_invalid_login_data(self):
         """
         Tests that ``authenticate`` method raises an exception when a valid
         token was received but it didn't contained valid authentication data,
         so the message contained in the token was not as expected.
         """
-        message = 'xxxx=2013-12-18 11:51:15|xxxxxxxx=johndoe|xxxx=John Doe|' \
-                  'xxxxx=john.doe@example.com'
-        aes_message, hmac_digest = self._encode_message(message)
-        token = base64.urlsafe_b64encode(aes_message + hmac_digest.digest())
-        auth_backend = TokenAuthentication(self.request, token=token)
+        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS):
+            message = 'xxxx=2013-12-18 11:51:15|xxxxxxxx=johndoe|xxxx=John Doe|' \
+                      'xxxxx=john.doe@example.com'
+            aes_message, hmac_digest = self._encode_message(message)
+            token = base64.urlsafe_b64encode(aes_message + hmac_digest.digest())
+            auth_backend = TokenAuthentication(self.request, token=token)
 
-        self.assertRaisesMessage(
-            TokenAuthenticationError,
-            'Message does not contain valid login data',
-            auth_backend.authenticate)
+            self.assertRaisesMessage(
+                TokenAuthenticationError,
+                'Message does not contain valid login data',
+                auth_backend.authenticate)
 
-    @mock.patch.object(bluebottle.clients, 'properties', MockBookingProperties())
     def test_authenticate_fail_token_expired(self):
         """
         Tests that ``authenticate`` method raises an exception when the token
         expired.
         """
-        # Set up a token with an old date (year 2012).
-        message = 'time=2012-12-18 11:51:15|username=johndoe|name=John Doe|' \
-                  'email=john.doe@example.com'
-        aes_message, hmac_digest = self._encode_message(message)
-        token = base64.urlsafe_b64encode(aes_message + hmac_digest.digest())
+        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS):
+            # Set up a token with an old date (year 2012).
+            message = 'time=2012-12-18 11:51:15|username=johndoe|name=John Doe|' \
+                      'email=john.doe@example.com'
+            aes_message, hmac_digest = self._encode_message(message)
+            token = base64.urlsafe_b64encode(aes_message + hmac_digest.digest())
 
-        auth_backend = TokenAuthentication(self.request, token=token)
+            auth_backend = TokenAuthentication(self.request, token=token)
 
-        self.assertRaisesMessage(
-            TokenAuthenticationError,
-            'Authentication token expired',
-            auth_backend.authenticate)
+            self.assertRaisesMessage(
+                TokenAuthenticationError,
+                'Authentication token expired',
+                auth_backend.authenticate)
 
-    @mock.patch.object(bluebottle.clients, 'properties', MockBookingProperties())
     def test_authenticate_successful_login(self):
         """
         Tests ``authenticate`` method when it performs a successful login.
         """
-        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        message = 'time={0}|username=johndoe|name=John Doe|' \
-                  'email=john.doe@example.com'.format(timestamp)
-        aes_message, hmac_digest = self._encode_message(message)
-        token = base64.urlsafe_b64encode(aes_message + hmac_digest.digest())
+        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS):
+            timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            message = 'time={0}|username=johndoe|name=John Doe|' \
+                      'email=john.doe@example.com'.format(timestamp)
+            aes_message, hmac_digest = self._encode_message(message)
+            token = base64.urlsafe_b64encode(aes_message + hmac_digest.digest())
 
-        auth_backend = TokenAuthentication(self.request, token=token)
-        user, created = auth_backend.authenticate()
+            auth_backend = TokenAuthentication(self.request, token=token)
+            user, created = auth_backend.authenticate()
 
-        # Check created user data.
-        self.assertEqual(user.username, 'johndoe')
-        self.assertEqual(user.is_active, True)
+            # Check created user data.
+            self.assertEqual(user.first_name, 'John')
+            self.assertEqual(user.is_active, True)
 
-        # Check `CheckedToken` related object.
-        checked_token = CheckedToken.objects.latest('pk')
-        self.assertEqual(checked_token.token, token)
-        self.assertEqual(checked_token.user, user)
+            # Check `CheckedToken` related object.
+            checked_token = CheckedToken.objects.latest('pk')
+            self.assertEqual(checked_token.token, token)
+            self.assertEqual(checked_token.user, user)

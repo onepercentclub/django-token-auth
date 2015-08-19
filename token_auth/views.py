@@ -7,12 +7,13 @@ from django.utils.module_loading import import_by_path
 from django.core.exceptions import ImproperlyConfigured
 
 from token_auth.exceptions import TokenAuthenticationError
-from bluebottle import clients
+from token_auth.utils import get_settings
 
 
 def get_auth(request, **kwargs):
+    settings = get_settings()
     try:
-        backend = clients.properties.TOKEN_AUTH_BACKEND
+        backend = settings['backend']
     except AttributeError:
         raise ImproperlyConfigured('TokenAuth backend not set')
 
@@ -46,9 +47,11 @@ class TokenLoginView(View):
             return HttpResponseRedirect(url)
 
         if link:
-            return HttpResponseRedirect("/go/login-with/{0}?{1}".format(user.get_jwt_token(), urllib.quote_plus(link)))
+            return HttpResponseRedirect("/go/login-with/{0}?{1}".format(
+                user.get_jwt_token(), urllib.quote_plus(link)))
 
-        return HttpResponseRedirect("/go/login-with/{0}".format(user.get_jwt_token()))
+        return HttpResponseRedirect("/go/login-with/{0}".format(
+            user.get_jwt_token()))
 
 
 class TokenErrorView(TemplateView):
