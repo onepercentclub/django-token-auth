@@ -5,10 +5,8 @@ from datetime import datetime, timedelta
 
 from Crypto.Cipher import AES
 from Crypto import Random
-from django.conf import settings
 from django.test import TestCase
 from django.test.utils import override_settings
-from django.db import connection
 
 from token_auth.auth.booking import (
     TokenAuthentication as BookingTokenAuthentication,
@@ -16,7 +14,7 @@ from token_auth.auth.booking import (
 
 from token_auth.models import CheckedToken
 from .factories import CheckedTokenFactory
-from token_auth.utils import get_token_settings
+from token_auth.auth.base import get_token_settings
 
 
 class TestBookingTokenAuthentication(TestCase):
@@ -92,7 +90,8 @@ class TestBookingTokenAuthentication(TestCase):
         Tests the method to decrypt the AES encoded message.
         """
         aes_message, hmac_digest = self._encode_message(self.data)
-        message = self.auth_backend.decrypt_message(aes_message + hmac_digest.digest())
+        token = base64.urlsafe_b64encode(aes_message + hmac_digest.digest())
+        message = self.auth_backend.decrypt_message(token)
         unpad = lambda s: s[0:-ord(s[-1])]
 
         self.assertEqual(unpad(message), self.data)
@@ -126,7 +125,7 @@ class TestBookingTokenAuthentication(TestCase):
         timestamp is given.
         """
         login_time = datetime.now() - timedelta(
-            days=self.auth_backend.expiration_date + 1)
+            days=self.auth_backend.settings['token_expiration'] + 1)
         self.assertFalse(self.auth_backend.check_timestamp(login_time))
 
     def test_authenticate_fail_no_token(self):
