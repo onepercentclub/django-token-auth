@@ -6,9 +6,7 @@ import re
 import string
 from Crypto.Cipher import AES
 from datetime import datetime, timedelta
-from django.utils.timezone import now
 
-from django.conf import settings
 from django.contrib.auth import get_user_model
 
 from .models import CheckedToken
