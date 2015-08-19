@@ -26,7 +26,7 @@ def get_auth(request, **kwargs):
     return cls(request, **kwargs)
 
 
-class SSORedirectView(View):
+class TokenRedirectView(View):
     def get(self, request, *args, **kwargs):
         auth = get_auth(request)
 
