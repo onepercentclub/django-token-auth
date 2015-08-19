@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 
 from django.contrib.auth import get_user_model
 
-from .models import CheckedToken
+from ..models import CheckedToken
 from token_auth.utils import get_token_settings
 
 logger = logging.getLogger(__name__)
