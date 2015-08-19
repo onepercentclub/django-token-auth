@@ -21,63 +21,38 @@ class BaseTokenAuthentication(object):
 
         self.settings = get_settings()
 
-    def decrypt_message(self):
+    def authenticate_request(self):
         """
-        Should return an object with at least
-        'timestamp'
-        'email'
-
-        data = {
-            'timestamp': <timestamp>,
-            'email': <email>
-        }
+        Authenticate the request. Should return a dict containing data representing
+        the authenticated user.
         """
         raise NotImplemented()
-
-    def check_timestamp(self, data):
-        timestamp = datetime.strptime(data['timestamp'], '%Y-%m-%d %H:%M:%S')
-        time_limit = datetime.now() - \
-            timedelta(seconds=self.settings['token_expiration'])
-        if timestamp < time_limit:
-            raise TokenAuthenticationError('Authentication token expired')
-
-        return timestamp
-
-    def check_token_used(self):
-        if not self.args.get('token'):
-            raise TokenAuthenticationError(value='No token provided')
-        try:
-            CheckedToken.objects.get(token=self.args['token'])
-            raise TokenAuthenticationError(
-                value='Token was already used and is not valid')
-        except CheckedToken.DoesNotExist:
-            # Token was not used previously. Continue with auth process.
-            pass
 
     def set_user_data(self, user, data):
         for key, value in data.items():
             if hasattr(user, key):
                 setattr(user, key, value)
         user.save()
+
         return user
 
     def get_or_create_user(self, data):
-        return USER_MODEL.objects.get_or_create(email=data['email'],
-                                                username=data['email'])
+        return USER_MODEL.objects.get_or_create(email=data['email'])
+    def finalize(self, user, data):
+        """ Finalize the request. Used for example to store used tokens, to prevent
+        replay attacks
+        """
+        pass
+
     def authenticate(self):
-        self.check_token_used()
+        data = self.authenticate_request()
 
         data = self.decrypt_message()
-
-        timestamp = self.check_timestamp(data)
-
-        self.check_timestamp(data)
 
         user, created = self.get_or_create_user(data)
         user.is_active = True
         user = self.set_user_data(user, data)
 
-        CheckedToken.objects.create(token=self.args['token'], user=user, 
-                                    timestamp=timestamp).save()
+        self.finalize(user, data)
 
         return user, created
