@@ -2,9 +2,6 @@ import logging
 from datetime import datetime, timedelta
 
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ImproperlyConfigured
-
-from bluebottle import clients
 
 from token_auth.exceptions import TokenAuthenticationError
 from token_auth.utils import get_settings
