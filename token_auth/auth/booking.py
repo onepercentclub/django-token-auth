@@ -8,24 +8,15 @@ from Crypto.Cipher import AES
 from datetime import datetime, timedelta
 
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ImproperlyConfigured
 
 from ..models import CheckedToken
-from token_auth.utils import get_token_settings
+from token_auth.exceptions import TokenAuthenticationError
+from bluebottle import clients
 
 logger = logging.getLogger(__name__)
 
 USER_MODEL = get_user_model()
-
-
-class TokenAuthenticationError(Exception):
-    """
-    There was an error trying to authenticate with token.
-    """
-    def __init__(self, value=None):
-        self.value = value if value else 'Error trying to authenticate by token'
-
-    def __str__(self):
-        return repr(self.value)
 
 
 class TokenAuthentication(object):
@@ -50,10 +41,17 @@ class TokenAuthentication(object):
     5. Read the timestamp included in the message to check if the token already
     expired or if its finally valid.
     """
-    def __init__(self):
-        self.aes_key = get_token_settings('aes_key')
-        self.hmac_key = get_token_settings('hmac_key')
-        self.expiration_date = get_token_settings('token_expiration')
+    def __init__(self, request, **kwargs):
+        self.args = kwargs
+
+        try:
+            token_auth_properties = clients.properties.TOKEN_AUTH
+        except AttributeError:
+            raise ImproperlyConfigured('Token auth is missing in thenant properties')
+
+        self.aes_key = token_auth_properties['aes_key']
+        self.hmac_key = token_auth_properties['hmac_key']
+        self.expiration_date = token_auth_properties['token_expiration']
 
     def check_hmac_signature(self, message):
         """
@@ -103,8 +101,10 @@ class TokenAuthentication(object):
 
         return timestamp > time_limit
 
-    def authenticate(self, token=None):
-        if not token:
+    def authenticate(self):
+        try:
+            token = self.args['token']
+        except KeyError:
             raise TokenAuthenticationError(value='No token provided')
         try:
             # Add some grace for trigger happy people.
