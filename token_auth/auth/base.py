@@ -77,14 +77,14 @@ class BaseTokenAuthentication(object):
         raise NotImplemented()
 
     def check_timestamp(self, data):
-
         timestamp = datetime.strptime(data['timestamp'], '%Y-%m-%d %H:%M:%S')
         time_limit = datetime.now() - \
-                     timedelta(seconds=self.settings['expiration_date'])
-        if timestamp > time_limit:
+                     timedelta(seconds=self.settings['token_expiration'])
+        if timestamp < time_limit:
             raise TokenAuthenticationError('Authentication token expired')
+        return True
 
-    def check_token_used(self, token):
+    def check_token_not_used(self, token):
         if not token:
             raise TokenAuthenticationError(value='No token provided')
         try:
@@ -94,6 +94,7 @@ class BaseTokenAuthentication(object):
         except CheckedToken.DoesNotExist:
             # Token was not used previously. Continue with auth process.
             pass
+        return True
 
     def set_user_data(self, user, data):
         for field in data:
@@ -102,17 +103,19 @@ class BaseTokenAuthentication(object):
         user.save()
         return user
 
-    def authenticate(self, token):
+    def authenticate(self, token=None):
 
-        self.check_token_used(token)
+        self.check_token_not_used(token)
 
         data = self.decrypt_message(token)
 
         self.check_timestamp(data)
 
-        user, created = USER_MODEL.get_or_create(email=data['email'])
+        user, created = USER_MODEL.objects.get_or_create(email=data['email'])
         user = self.set_user_data(user, data)
 
-        CheckedToken.objects.create(token=token, user=user).save()
+        checked_token = CheckedToken.objects.create(token=token, user=user,
+                                                    timestamp=data['timestamp'])
+        checked_token.save()
 
         return user, created

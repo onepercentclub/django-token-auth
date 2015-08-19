@@ -2,6 +2,7 @@ import base64
 import hashlib
 import hmac
 from datetime import datetime, timedelta
+from string import strip
 
 from Crypto.Cipher import AES
 from Crypto import Random
@@ -9,12 +10,11 @@ from django.test import TestCase
 from django.test.utils import override_settings
 
 from token_auth.auth.booking import (
-    TokenAuthentication as BookingTokenAuthentication,
-    TokenAuthenticationError as BookingTokenAuthenticationError)
+    TokenAuthentication as BookingTokenAuthentication)
 
 from token_auth.models import CheckedToken
 from .factories import CheckedTokenFactory
-from token_auth.auth.base import get_token_settings
+from token_auth.auth.base import get_token_settings, TokenAuthenticationError
 
 
 class TestBookingTokenAuthentication(TestCase):
@@ -92,9 +92,13 @@ class TestBookingTokenAuthentication(TestCase):
         aes_message, hmac_digest = self._encode_message(self.data)
         token = base64.urlsafe_b64encode(aes_message + hmac_digest.digest())
         message = self.auth_backend.decrypt_message(token)
-        unpad = lambda s: s[0:-ord(s[-1])]
 
-        self.assertEqual(unpad(message), self.data)
+        message['email'] = strip(message['email'])
+
+        self.assertEqual(message, {'timestamp': '2013-12-23 17:51:15',
+                                   'first_name': 'John',
+                                   'last_name': 'Doe',
+                                   'email': 'john.doe@example.com'})
 
     def test_get_login_data(self):
         """
@@ -117,7 +121,9 @@ class TestBookingTokenAuthentication(TestCase):
         token is received.
         """
         login_time = datetime.now() - timedelta(seconds=10)
-        self.assertTrue(self.auth_backend.check_timestamp(login_time))
+        login_time = login_time.strftime('%Y-%m-%d %H:%M:%S')
+        data = {'timestamp': login_time}
+        self.assertTrue(self.auth_backend.check_timestamp(data))
 
     def test_check_timestamp_timedout_token(self):
         """
@@ -126,7 +132,14 @@ class TestBookingTokenAuthentication(TestCase):
         """
         login_time = datetime.now() - timedelta(
             days=self.auth_backend.settings['token_expiration'] + 1)
-        self.assertFalse(self.auth_backend.check_timestamp(login_time))
+        login_time = login_time.strftime('%Y-%m-%d %H:%M:%S')
+        data = {'timestamp': login_time}
+        self.assertRaisesMessage(
+            TokenAuthenticationError,
+            'Authentication token expired',
+            self.auth_backend.check_timestamp,
+            data)
+
 
     def test_authenticate_fail_no_token(self):
         """
@@ -134,7 +147,7 @@ class TestBookingTokenAuthentication(TestCase):
         is provided.
         """
         self.assertRaisesMessage(
-            BookingTokenAuthenticationError,
+            TokenAuthenticationError,
             'No token provided',
             self.auth_backend.authenticate)
 
@@ -144,7 +157,7 @@ class TestBookingTokenAuthentication(TestCase):
         token is provided.
         """
         self.assertRaisesMessage(
-            BookingTokenAuthenticationError,
+            TokenAuthenticationError,
             'Token was already used and is not valid',
             self.auth_backend.authenticate,
             self.checked_token.token)
@@ -155,7 +168,7 @@ class TestBookingTokenAuthentication(TestCase):
         token is received (HMAC-SHA1 checking).
         """
         self.assertRaisesMessage(
-            BookingTokenAuthenticationError,
+            TokenAuthenticationError,
             'HMAC authentication failed',
             self.auth_backend.authenticate,
             self.corrupt_token)
@@ -172,7 +185,7 @@ class TestBookingTokenAuthentication(TestCase):
         token = base64.urlsafe_b64encode(aes_message + hmac_digest.digest())
 
         self.assertRaisesMessage(
-            BookingTokenAuthenticationError,
+            TokenAuthenticationError,
             'Message does not contain valid login data',
             self.auth_backend.authenticate,
             token)
@@ -189,7 +202,7 @@ class TestBookingTokenAuthentication(TestCase):
         token = base64.urlsafe_b64encode(aes_message + hmac_digest.digest())
 
         self.assertRaisesMessage(
-            BookingTokenAuthenticationError,
+            TokenAuthenticationError,
             'Authentication token expired',
             self.auth_backend.authenticate,
             token)
@@ -207,7 +220,7 @@ class TestBookingTokenAuthentication(TestCase):
         user, created = self.auth_backend.authenticate(token=token)
 
         # Check created user data.
-        self.assertEqual(user.username, 'johndoe')
+        self.assertEqual(user.email, 'john.doe@example.com')
         self.assertEqual(user.is_active, True)
 
         # Check `CheckedToken` related object.

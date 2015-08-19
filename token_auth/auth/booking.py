@@ -7,48 +7,14 @@ from Crypto.Cipher import AES
 from Crypto import Random
 from datetime import datetime
 
-from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ImproperlyConfigured
 
-from token_auth.auth.base import BaseTokenAuthentication
+from token_auth.auth.base import (BaseTokenAuthentication,
+                                  get_token_settings, TokenAuthenticationError)
 
 logger = logging.getLogger(__name__)
 
 USER_MODEL = get_user_model()
-
-
-def get_token_settings(key=None):
-    """
-    Load the properties.
-    """
-
-    properties_path = getattr(settings,
-                              'TOKEN_AUTH_SETTINGS',
-                              'django.conf.settings')
-
-    parts = properties_path.split('.')
-    module = '.'.join([parts[i] for i in range(0,len(parts)-1)])
-    properties = parts[len(parts) - 1]
-
-    try:
-        m = __import__(module, fromlist=[''])
-    except ImportError:
-        raise ImproperlyConfigured(
-            "Could not find module '{1}'".format(module))
-
-    try:
-        settings_path = getattr(m, properties)
-    except AttributeError:
-        raise ImproperlyConfigured(
-            "{0} needs attribute name '{1}'".format(module, properties))
-    try:
-        token_auth_settings = getattr(settings_path, 'TOKEN_AUTH')
-        if key:
-            return token_auth_settings[key]
-        return token_auth_settings
-    except AttributeError:
-        raise ImproperlyConfigured("TOKEN_AUTH missing in settings.")
 
 
 def generate_token(email, username, first_name, last_name):
@@ -85,18 +51,6 @@ def _encode_message(message):
     return aes_message, hmac_digest
 
 
-
-class TokenAuthenticationError(Exception):
-    """
-    There was an error trying to authenticate with token.
-    """
-    def __init__(self, value=None):
-        self.value = value if value else 'Error trying to authenticate by token'
-
-    def __str__(self):
-        return repr(self.value)
-
-
 class TokenAuthentication(BaseTokenAuthentication):
     """
     This authentication backend expects a token, encoded in URL-safe Base64, to
@@ -129,7 +83,6 @@ class TokenAuthentication(BaseTokenAuthentication):
 
         return True if hmac_data.digest() == checksum else False
 
-
     def get_login_data(self, data):
         """
         Obtains the data from the decoded message. Returns a Python tuple
@@ -158,8 +111,8 @@ class TokenAuthentication(BaseTokenAuthentication):
         if not self.check_hmac_signature(message):
             raise TokenAuthenticationError('HMAC authentication failed')
 
-        init_vector = token[:16]
-        enc_message = token[16:-20]
+        init_vector = message[:16]
+        enc_message = message[16:-20]
 
         aes = AES.new(self.settings['aes_key'], AES.MODE_CBC, init_vector)
         message = aes.decrypt(enc_message)
@@ -180,7 +133,7 @@ class TokenAuthentication(BaseTokenAuthentication):
 
         data = {
             'timestamp': login_data[0],
-            'email': login_data[3].strip(),
+            'email': login_data[3].strip().replace('\x0e', ''),
             'first_name': first_name,
             'last_name': last_name
         }
