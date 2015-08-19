@@ -1,21 +1,56 @@
-import string
 import base64
 import hashlib
 import hmac
 import logging
 import re
+import string
 from Crypto.Cipher import AES
 from Crypto import Random
 from datetime import datetime
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ImproperlyConfigured
 
-from token_auth.auth.base import (BaseTokenAuthentication,
-                                  get_token_settings, TokenAuthenticationError)
+from token_auth.auth.base import BaseTokenAuthentication
+from token_auth.exceptions import TokenAuthenticationError
 
 logger = logging.getLogger(__name__)
 
 USER_MODEL = get_user_model()
+
+
+def get_token_settings(key=None):
+    """
+    Load the properties.
+    """
+
+    properties_path = getattr(settings,
+                              'TOKEN_AUTH_SETTINGS',
+                              'django.conf.settings')
+
+    parts = properties_path.split('.')
+    module = '.'.join([parts[i] for i in range(0,len(parts)-1)])
+    properties = parts[len(parts) - 1]
+
+    try:
+        m = __import__(module, fromlist=[''])
+    except ImportError:
+        raise ImproperlyConfigured(
+            "Could not find module '{1}'".format(module))
+
+    try:
+        settings_path = getattr(m, properties)
+    except AttributeError:
+        raise ImproperlyConfigured(
+            "{0} needs attribute name '{1}'".format(module, properties))
+    try:
+        token_auth_settings = getattr(settings_path, 'TOKEN_AUTH')
+        if key:
+            return token_auth_settings[key]
+        return token_auth_settings
+    except AttributeError:
+        raise ImproperlyConfigured("TOKEN_AUTH missing in settings.")
 
 
 def generate_token(email, username, first_name, last_name):
@@ -107,11 +142,11 @@ class TokenAuthentication(BaseTokenAuthentication):
         return USER_MODEL.objects.create(email=data['email'],
                                          username=data['email']), True
 
-    def decrypt_message(self, token=None):
+    def decrypt_message(self):
         """
         Decrypts the AES encoded message.
         """
-        token = str(token)
+        token = str(self.args['token'])
         message = base64.urlsafe_b64decode(token)
 
         # Check that the message is valid (HMAC-SHA1 checking).
@@ -123,7 +158,6 @@ class TokenAuthentication(BaseTokenAuthentication):
 
         aes = AES.new(self.settings['aes_key'], AES.MODE_CBC, init_vector)
         message = aes.decrypt(enc_message)
-
 
         # Get the login data in an easy-to-use tuple.
         try:
