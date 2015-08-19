@@ -47,9 +47,6 @@ class TokenAuthentication(BaseTokenAuthentication):
     5. Read the timestamp included in the message to check if the token already
     expired or if its finally valid.
     """
-    def sso_url(self):
-        return self.settings['sso_url']
-
     def check_hmac_signature(self, message):
         """
         Checks the HMAC-SHA1 signature of the message.

@@ -18,8 +18,12 @@ class BaseTokenAuthentication(object):
     """
     def __init__(self, request, **kwargs):
         self.args = kwargs
+        self.request = request
 
         self.settings = get_settings()
+
+    def sso_url(self):
+        return self.settings['sso_url']
 
     def authenticate_request(self):
         """

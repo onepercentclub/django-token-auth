@@ -31,6 +31,7 @@ def get_saml_request(request):
 
 
 class SAMLAuthentication(BaseTokenAuthentication):
+
     def __init__(self, request, **kwargs):
         super(SAMLAuthentication, self).__init__(request, **kwargs)
         self.auth = OneLogin_Saml2_Auth(get_saml_request(request), self.settings)
@@ -38,12 +39,20 @@ class SAMLAuthentication(BaseTokenAuthentication):
     def sso_url(self):
         return self.auth.login()
 
+    def parse_user(self, user_data):
+        return {
+            'email': user_data['User.email'][0],
+            'first_name': user_data['User.FirstName'][0],
+            'last_name': user_data['User.LastName'][0]
+        }
+
     def authenticate_request(self):
+
         self.auth.process_response()
 
         if self.auth.is_authenticated():
             user_data = self.auth.get_attributes()
 
-            return self.user(user_data)
+            return self.parse_user(user_data)
         else:
-            raise TokenAuthenticationError(self.auth.get_errors)
+            raise TokenAuthenticationError(self.auth.get_errors())

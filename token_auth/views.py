@@ -35,7 +35,7 @@ class TokenRedirectView(View):
 
 class TokenLoginView(View):
 
-    def get(self, request, *args, **kwargs):
+    def parse_request(self, request, *args, **kwargs):
         link = kwargs.get('link')
         auth = get_auth(request, **kwargs)
 
@@ -52,6 +52,12 @@ class TokenLoginView(View):
 
         return HttpResponseRedirect("/go/login-with/{0}".format(
             user.get_jwt_token()))
+
+    def get(self, request, *args, **kwargs):
+        return self.parse_request(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return self.parse_request(request, *args, **kwargs)
 
 
 class TokenErrorView(TemplateView):
@@ -71,6 +77,13 @@ class MembersOnlyView(TemplateView):
     template_name = 'token/members-only.tpl'
 
     def get(self, request, *args, **kwargs):
+        auth = get_auth(request, **kwargs)
         context = self.get_context_data(**kwargs)
         context['url'] = request.GET.get('url', '')
+        context['ssoUrl'] = auth.sso_url
         return self.render_to_response(context)
+
+
+class MetadataView(TemplateView):
+
+    template_name = 'token/metadata.tpl'
