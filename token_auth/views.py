@@ -1,10 +1,7 @@
-from django.contrib.auth import login
 import urllib
-from django.http.response import HttpResponseRedirect, HttpResponse
+from django.http.response import HttpResponseRedirect
 
 from django.views.generic.base import View, TemplateView
-
-from auth import TokenAuthenticationError, TokenAuthentication
 
 
 class TokenLoginView(View):
@@ -13,6 +10,9 @@ class TokenLoginView(View):
         token = kwargs['token']
         link = kwargs.get('link')
 
+
+        from token_auth.auth.booking import (TokenAuthentication,
+                                             TokenAuthenticationError)
         auth = TokenAuthentication()
         try:
             user, created = auth.authenticate(token)

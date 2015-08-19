@@ -10,13 +10,16 @@ from django.test import TestCase
 from django.test.utils import override_settings
 from django.db import connection
 
-from token_auth.auth import TokenAuthentication, TokenAuthenticationError
+from token_auth.auth.booking import (
+    TokenAuthentication as BookingTokenAuthentication,
+    TokenAuthenticationError as BookingTokenAuthenticationError)
+
 from token_auth.models import CheckedToken
 from .factories import CheckedTokenFactory
 from token_auth.utils import get_token_settings
 
 
-class TestTokenAuthentication(TestCase):
+class TestBookingTokenAuthentication(TestCase):
     """
     Tests the Token Authentication backend.
     """
@@ -29,7 +32,7 @@ class TestTokenAuthentication(TestCase):
     )
     def setUp(self):
         # import ipdb; ipdb.set_trace()
-        self.auth_backend = TokenAuthentication()
+        self.auth_backend = BookingTokenAuthentication()
         self.checked_token = CheckedTokenFactory.create()
         self.data = 'time=2013-12-23 17:51:15|username=johndoe|name=John Doe' \
                     '|email=john.doe@example.com'
@@ -132,7 +135,7 @@ class TestTokenAuthentication(TestCase):
         is provided.
         """
         self.assertRaisesMessage(
-            TokenAuthenticationError,
+            BookingTokenAuthenticationError,
             'No token provided',
             self.auth_backend.authenticate)
 
@@ -142,7 +145,7 @@ class TestTokenAuthentication(TestCase):
         token is provided.
         """
         self.assertRaisesMessage(
-            TokenAuthenticationError,
+            BookingTokenAuthenticationError,
             'Token was already used and is not valid',
             self.auth_backend.authenticate,
             self.checked_token.token)
@@ -153,7 +156,7 @@ class TestTokenAuthentication(TestCase):
         token is received (HMAC-SHA1 checking).
         """
         self.assertRaisesMessage(
-            TokenAuthenticationError,
+            BookingTokenAuthenticationError,
             'HMAC authentication failed',
             self.auth_backend.authenticate,
             self.corrupt_token)
@@ -170,7 +173,7 @@ class TestTokenAuthentication(TestCase):
         token = base64.urlsafe_b64encode(aes_message + hmac_digest.digest())
 
         self.assertRaisesMessage(
-            TokenAuthenticationError,
+            BookingTokenAuthenticationError,
             'Message does not contain valid login data',
             self.auth_backend.authenticate,
             token)
@@ -187,7 +190,7 @@ class TestTokenAuthentication(TestCase):
         token = base64.urlsafe_b64encode(aes_message + hmac_digest.digest())
 
         self.assertRaisesMessage(
-            TokenAuthenticationError,
+            BookingTokenAuthenticationError,
             'Authentication token expired',
             self.auth_backend.authenticate,
             token)
