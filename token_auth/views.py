@@ -11,7 +11,7 @@ class TokenLoginView(View):
         link = kwargs.get('link')
 
 
-        from token_auth.auth.booking import (TokenAuthentication, 
+        from token_auth.auth.booking import (TokenAuthentication,
                                              TokenAuthenticationError)
         auth = TokenAuthentication()
         try:
