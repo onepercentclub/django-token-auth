@@ -10,7 +10,6 @@ class TokenLoginView(View):
         token = kwargs['token']
         link = kwargs.get('link')
 
-
         from token_auth.auth.booking import (TokenAuthentication,
                                              TokenAuthenticationError)
         auth = TokenAuthentication()
@@ -23,9 +22,11 @@ class TokenLoginView(View):
             return HttpResponseRedirect(url)
 
         if link:
-            return HttpResponseRedirect("/go/login-with/{0}?{1}".format(user.get_jwt_token(), urllib.quote_plus(link)))
+            return HttpResponseRedirect("/go/login-with/{0}?{1}".format(
+                user.get_jwt_token(), urllib.quote_plus(link)))
 
-        return HttpResponseRedirect("/go/login-with/{0}".format(user.get_jwt_token()))
+        return HttpResponseRedirect("/go/login-with/{0}".format(
+            user.get_jwt_token()))
 
 
 class TokenErrorView(TemplateView):
