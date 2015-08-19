@@ -1,3 +1,4 @@
+import string
 import base64
 import hashlib
 import hmac
@@ -100,6 +101,12 @@ class TokenAuthentication(BaseTokenAuthentication):
 
         return login_data.groups()
 
+    def get_or_create_user(self, data):
+        if USER_MODEL.objects.filter(email=data['email']).count():
+            return USER_MODEL.objects.get(email=data['email']), False
+        return USER_MODEL.objects.create(email=data['email'],
+                                         username=data['email']), True
+
     def decrypt_message(self, token=None):
         """
         Decrypts the AES encoded message.
@@ -130,12 +137,15 @@ class TokenAuthentication(BaseTokenAuthentication):
         parts = name.split(' ')
         parts.pop(0)
         last_name = " ".join(parts)
+        email = login_data[3].strip()
+        email = filter(lambda x: x in string.printable, email)
 
         data = {
             'timestamp': login_data[0],
-            'email': login_data[3].strip().replace('\x0e', ''),
+            'email': email,
             'first_name': first_name,
-            'last_name': last_name
+            'last_name': last_name,
+            'username': email
         }
 
         return data

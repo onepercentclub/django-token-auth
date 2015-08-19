@@ -97,11 +97,15 @@ class BaseTokenAuthentication(object):
         return True
 
     def set_user_data(self, user, data):
-        for field in data:
-            if hasattr(USER_MODEL, field):
-                setattr(user, field, data[field])
+        for key, value in data.items():
+            if hasattr(user, key):
+                setattr(user, key, value)
         user.save()
         return user
+
+    def get_or_create_user(self, data):
+        return USER_MODEL.objects.get_or_create(email=data['email'],
+                                                username=data['email'])
 
     def authenticate(self, token=None):
 
@@ -111,7 +115,8 @@ class BaseTokenAuthentication(object):
 
         self.check_timestamp(data)
 
-        user, created = USER_MODEL.objects.get_or_create(email=data['email'])
+        user, created = self.get_or_create_user(data)
+        user.is_active = True
         user = self.set_user_data(user, data)
 
         checked_token = CheckedToken.objects.create(token=token, user=user,
