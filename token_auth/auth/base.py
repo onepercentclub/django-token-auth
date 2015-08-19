@@ -55,12 +55,15 @@ class BaseTokenAuthentication(object):
             pass
 
     def set_user_data(self, user, data):
-        for field in data:
-            if hasattr(user, field):
-                setattr(user, field, data[field])
+        for key, value in data.items():
+            if hasattr(user, key):
+                setattr(user, key, value)
         user.save()
         return user
 
+    def get_or_create_user(self, data):
+        return USER_MODEL.objects.get_or_create(email=data['email'],
+                                                username=data['email'])
     def authenticate(self):
         self.check_token_used()
 
@@ -68,10 +71,13 @@ class BaseTokenAuthentication(object):
 
         timestamp = self.check_timestamp(data)
 
-        user, created = USER_MODEL.objects.get_or_create(email=data['email'])
+        self.check_timestamp(data)
 
+        user, created = self.get_or_create_user(data)
+        user.is_active = True
         user = self.set_user_data(user, data)
 
-        CheckedToken.objects.create(token=self.args['token'], user=user, timestamp=timestamp).save()
+        CheckedToken.objects.create(token=self.args['token'], user=user, 
+                                    timestamp=timestamp).save()
 
         return user, created

@@ -101,7 +101,8 @@ class TestBookingTokenAuthentication(TestCase):
                 message, {'timestamp': '2013-12-23 17:51:15',
                           'first_name': 'John',
                           'last_name': 'Doe',
-                          'email': 'john.doe@example.com'
+                          'email': 'john.doe@example.com',
+                          'username': 'john.doe@example.com'
                           })
 
     def test_get_login_data(self):

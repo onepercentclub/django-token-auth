@@ -1,11 +1,7 @@
-import os
-import sys
-from contextlib import contextmanager
-from optparse import make_option, OptionParser
+from optparse import make_option
 
 from django.core.management.base import BaseCommand
-from django.core.management.base import CommandError
-from token_auth.utils import generate_token
+from token_auth.auth.booking import generate_token
 
 try:
     from django.utils.six.moves import input
