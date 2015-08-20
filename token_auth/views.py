@@ -75,15 +75,13 @@ class TokenLogoutView(TemplateView):
     Process Single Logout
     FIXME: Not working yet
     """
-
     query_string = True
     template_name = 'token/token-logout.tpl'
 
     def get(self, request, *args, **kwargs):
         link = kwargs.get('link')
         auth = get_auth(request, **kwargs)
-        dscb = lambda: request.session.flush()
-        url = auth.process_slo(delete_session_cb=dscb)
+        url = auth.logout()
         errors = auth.auth.get_errors()
         if len(errors) == 0:
             if url is not None:
@@ -120,9 +118,12 @@ class MembersOnlyView(TemplateView):
         return self.render_to_response(context)
 
 
-class MetadataView(TemplateView):
+class MetadataView(View):
     """
     Show (SAML) metadata
-    FIXME: Make this dynamic
     """
-    template_name = 'token/metadata.tpl'
+
+    def get(self, request, *args, **kwargs):
+        auth = get_auth(request, **kwargs)
+        metadata = auth.get_metadata()
+        return HttpResponse(content=metadata, content_type='text/xml')

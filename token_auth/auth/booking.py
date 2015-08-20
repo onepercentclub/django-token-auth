@@ -3,20 +3,15 @@ import hashlib
 import hmac
 import logging
 import re
-from datetime import datetime, timedelta
+from datetime import timedelta
 import string
-from Crypto.Cipher import AES
-from Crypto import Random
 from datetime import datetime
 
 from Crypto.Cipher import AES
 
-from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ImproperlyConfigured
 
 from token_auth.models import CheckedToken
-from token_auth.exceptions import TokenAuthenticationError
 from token_auth.auth.base import BaseTokenAuthentication
 from token_auth.exceptions import TokenAuthenticationError
 
@@ -143,14 +138,11 @@ class TokenAuthentication(BaseTokenAuthentication):
 
     def authenticate_request(self):
         self.check_token_used()
-
         data = self.decrypt_message()
-
         self.check_timestamp(data)
 
         return data
 
     def finalize(self, user, data):
-        CheckedToken.objects.create(
-            token=self.args['token'], user=user, timestamp=data['timestamp']
-        ).save()
+        CheckedToken.objects.create(token=self.args['token'], user=user,
+                                    timestamp=data['timestamp']).save()

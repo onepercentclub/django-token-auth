@@ -14,6 +14,5 @@ urlpatterns = patterns(
         name='token-login-link'),
     url(r'^error/$', TokenErrorView.as_view(), name='token-error'),
     url(r'^missing/$', MembersOnlyView.as_view(), name='members-only'),
-    url(r'^metadata/$', MetadataView.as_view(content_type='text/xml'),
-        name='token-metadata'),
+    url(r'^metadata/$', MetadataView.as_view(), name='token-metadata'),
 )
