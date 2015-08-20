@@ -65,6 +65,10 @@ class BaseTokenAuthentication(object):
         """
         pass
 
+    def get_metadata(self):
+        metadata = "<sso-url>{0}</sso-url>".format(self.sso_url())
+        return metadata
+
     def authenticate(self):
         data = self.authenticate_request()
 
