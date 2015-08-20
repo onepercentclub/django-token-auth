@@ -39,6 +39,9 @@ class SAMLAuthentication(BaseTokenAuthentication):
     def sso_url(self):
         return self.auth.login()
 
+    def process_slo(self, delete_session_cb):
+        self.auth.process_slo(delete_session_cb)
+
     def parse_user(self, user_data):
         return {
             'email': user_data['User.email'][0],
