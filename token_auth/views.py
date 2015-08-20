@@ -26,22 +26,24 @@ def get_auth(request, **kwargs):
     return cls(request, **kwargs)
 
 
-class TokenRedirectView(RedirectView):
+class TokenRedirectView(View):
     """
     Redirect to SSO login page
     """
-
     permanent = False
     query_string = True
     pattern_name = 'article-detail'
 
-    def get_redirect_url(self, *args, **kwargs):
-        auth = get_auth(self.request, **kwargs)
+    def get(self, request, *args, **kwargs):
+        auth = get_auth(request, **kwargs)
         sso_url = auth.sso_url()
-        return sso_url
+        return HttpResponseRedirect(sso_url)
 
 
 class TokenLoginView(View):
+    """
+    Parse GET/POST request and login through set Authentication backend
+    """
 
     def parse_request(self, request, *args, **kwargs):
         link = kwargs.get('link')

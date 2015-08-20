@@ -57,10 +57,9 @@ class RedirectViewTestCase(TestCase):
     def test_get(self):
         with self.settings(TOKEN_AUTH={'backend': 'token_auth.tests.test_views.DummyAuthentication'}):
             response = self.view.get(self.factory.get('/api/sso/redirect'))
-
-            self.assertEqual(response.status_code, 200)
-            data = json.loads(response.content)
-            self.assertEqual(data['sso-url'], 'http://example.com/sso')
+            expected_url = 'http://example.com/sso'
+            self.assertEqual(response.status_code, 302)
+            self.assertEqual(response.url, expected_url)
 
 
 class LoginViewTestCase(TestCase):

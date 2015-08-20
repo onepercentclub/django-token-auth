@@ -42,6 +42,7 @@ class BaseTokenAuthentication(object):
 
     def get_or_create_user(self, data):
         return USER_MODEL.objects.get_or_create(email=data['email'])
+    
     def finalize(self, user, data):
         """ Finalize the request. Used for example to store used tokens, to prevent
         replay attacks

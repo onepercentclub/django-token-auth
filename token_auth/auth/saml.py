@@ -7,7 +7,6 @@ from token_auth.auth.base import BaseTokenAuthentication
 def get_saml_request(request):
     http_host = request.META.get('HTTP_HOST', None)
     if 'HTTP_X_FORWARDED_FOR' in request.META:
-        # This is only true for my particular installations.
         server_port = None
         https = request.META.get('HTTP_X_FORWARDED_PROTO') == 'https'
     else:
@@ -34,7 +33,8 @@ class SAMLAuthentication(BaseTokenAuthentication):
 
     def __init__(self, request, **kwargs):
         super(SAMLAuthentication, self).__init__(request, **kwargs)
-        self.auth = OneLogin_Saml2_Auth(get_saml_request(request), self.settings)
+        self.auth = OneLogin_Saml2_Auth(get_saml_request(request),
+                                        self.settings)
 
     def sso_url(self):
         return self.auth.login()
