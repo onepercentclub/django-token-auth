@@ -49,7 +49,10 @@ class SAMLAuthentication(BaseTokenAuthentication):
 
     def process_logout(self):
         # Logout
-        self.auth.process_slo()
+        url = self.auth.process_slo()
+        errors = self.auth.get_errors()
+        if len(errors) == 0:
+            return url
 
     def parse_user(self, user_data):
         return {
