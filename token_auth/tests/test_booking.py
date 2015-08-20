@@ -17,6 +17,7 @@ from .factories import CheckedTokenFactory
 
 TOKEN_AUTH_SETTINGS = {
     'backend': 'token_auth.auth.booking.TokenAuthentication',
+    'sso_url': 'https://example.org',
     'token_expiration': 600,
     'hmac_key': 'bbbbbbbbbbbbbbbb',
     'aes_key': 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
@@ -69,6 +70,11 @@ class TestBookingTokenAuthentication(TestCase):
         hmac_digest = hmac.new(self.hmac_key, aes_message, hashlib.sha1)
 
         return aes_message, hmac_digest
+
+    def test_sso_url(self):
+        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS):
+            self.assertEqual(self.auth_backend.sso_url(), TOKEN_AUTH_SETTINGS['sso_url'])
+
 
     def test_check_hmac_signature_ok(self):
         """

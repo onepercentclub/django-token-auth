@@ -4,9 +4,18 @@ cache:
   directories:
   - $HOME/.pip-cache/
 python:
-- '2.7'
+- '2.7.9'
 env:
   matrix:
   - DJANGO=django==1.6.8"
+addons:
+  apt:
+    packages:
+    - libxmlsec1
+    - libxmlsec1-dev
+    - swig
+install:
+- pip install --upgrade setuptools pip
+- pip install python-saml==2.1.4 Django==1.6.8 pycrypto==2.6.1 --use-wheel --find-links=https://stream.onepercentclub.com/wheelhouse/  --process-dependency-links --find-links=https://stream.onepercentclub.com/wheelhouse/
 script:
 - python ./setup.py test
