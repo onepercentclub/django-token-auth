@@ -81,15 +81,10 @@ class TokenLogoutView(TemplateView):
     def get(self, request, *args, **kwargs):
         link = kwargs.get('link')
         auth = get_auth(request, **kwargs)
-        url = auth.logout()
-        errors = auth.auth.get_errors()
-        if len(errors) == 0:
-            if url is not None:
-                return HttpResponseRedirect(url)
-            else:
-                success_slo = True
-        print errors
-        return self.render_to_response(errors)
+        url = auth.process_logout()
+        if url:
+            return HttpResponseRedirect(url)
+        return self.render_to_response()
 
 
 class TokenErrorView(TemplateView):
