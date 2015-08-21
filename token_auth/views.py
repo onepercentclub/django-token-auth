@@ -36,7 +36,7 @@ class TokenRedirectView(View):
 
     def get(self, request, *args, **kwargs):
         auth = get_auth(request, **kwargs)
-        sso_url = auth.sso_url()
+        sso_url = auth.sso_url(target_url=request.GET.get('url'))
         return HttpResponseRedirect(sso_url)
 
 

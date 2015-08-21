@@ -35,8 +35,11 @@ class SAMLAuthentication(BaseTokenAuthentication):
         self.auth = OneLogin_Saml2_Auth(get_saml_request(request),
                                         self.settings)
 
-    def sso_url(self):
-        return self.auth.login()
+    def sso_url(self, target_url=None):
+        if target_url:
+            return self.auth.login(return_to=target_url)
+        else:
+            return self.auth.login()
 
     def get_metadata(self):
         saml_settings = OneLogin_Saml2_Settings(settings=self.settings,

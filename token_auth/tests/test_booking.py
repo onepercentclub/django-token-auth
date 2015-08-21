@@ -75,6 +75,12 @@ class TestBookingTokenAuthentication(TestCase):
         with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS):
             self.assertEqual(self.auth_backend.sso_url(), TOKEN_AUTH_SETTINGS['sso_url'])
 
+    def test_sso_url_custom_target(self):
+        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS):
+            self.assertEqual(
+                self.auth_backend.sso_url(target_url='/test/'),
+                TOKEN_AUTH_SETTINGS['sso_url'] + '?url=%2Ftest%2F'
+            )
 
     def test_check_hmac_signature_ok(self):
         """
