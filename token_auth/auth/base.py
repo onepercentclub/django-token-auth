@@ -1,11 +1,8 @@
 import logging
-from datetime import datetime, timedelta
+import urllib
 
 from django.contrib.auth import get_user_model
-
-from token_auth.exceptions import TokenAuthenticationError
 from token_auth.utils import get_settings
-from ..models import CheckedToken
 
 logger = logging.getLogger(__name__)
 
@@ -22,8 +19,12 @@ class BaseTokenAuthentication(object):
 
         self.settings = get_settings()
 
-    def sso_url(self):
-        return self.settings['sso_url']
+    def sso_url(self, target_url=None):
+        url = self.settings['sso_url']
+        if target_url:
+            url += '?{}'.format(urllib.urlencode({'url': target_url}))
+
+        return url
 
     def authenticate_request(self):
         """
@@ -51,7 +52,7 @@ class BaseTokenAuthentication(object):
         Get or create the user.
         """
         return USER_MODEL.objects.get_or_create(email=data['email'])
-    
+
     def finalize(self, user, data):
         """
         Finalize the request. Used for example to store used tokens,

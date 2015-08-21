@@ -10,16 +10,12 @@ from datetime import datetime
 from Crypto import Random
 from Crypto.Cipher import AES
 
-from django.contrib.auth import get_user_model
-
 from token_auth.models import CheckedToken
 from token_auth.auth.base import BaseTokenAuthentication
 from token_auth.exceptions import TokenAuthenticationError
 from token_auth.utils import get_settings
 
 logger = logging.getLogger(__name__)
-
-USER_MODEL = get_user_model()
 
 
 def _encode_message(message):
