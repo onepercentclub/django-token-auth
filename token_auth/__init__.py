@@ -1,5 +1,6 @@
 VERSION = (0, 2, 3, 'final')
 
+
 def get_version():
     version = '%s.%s' % (VERSION[0], VERSION[1])
     if VERSION[2] is not None:
