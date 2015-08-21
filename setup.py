@@ -18,7 +18,7 @@ setuptools.setup(
     long_description=README,
     url="http://onepercentclub.com",
     author="1%Club Developers",
-    author_email="devteam@onepercentclub.com", 
+    author_email="devteam@onepercentclub.com",
     install_requires=[
         'Django>=1.6.8',
         'python-saml==2.1.4'
@@ -28,17 +28,15 @@ setuptools.setup(
         'factory-boy==2.3.1',
         'pycrypto==2.6.1'
     ],
-    test_suite = "token_auth.runtests.runtests",
+    test_suite="token_auth.runtests.runtests",
     classifiers=[
         'Environment :: Web Environment',
         'Framework :: Django',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: None', 
+        'License :: OSI Approved :: None',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Topic :: Internet :: WWW/HTTP',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content'
     ]
-
 )
-

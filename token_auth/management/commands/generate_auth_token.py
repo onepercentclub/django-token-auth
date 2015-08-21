@@ -14,12 +14,12 @@ class Command(BaseCommand):
 
     def __init__(self):
         self.option_list = self.option_list + (
-            make_option('--email', '-e',  dest='email', default=None,
-                    help="Email to generate a token for."),
-            make_option('--first-name', '-f',  dest='first-name', default=None,
-                    help="Last name for the user."),
-            make_option('--last-name', '-l',  dest='last-name', default=None,
-                    help="First name for the user."),
+            make_option('--email', '-e', dest='email', default=None,
+                        help="Email to generate a token for."),
+            make_option('--first-name', '-f', dest='first-name', default=None,
+                        help="Last name for the user."),
+            make_option('--last-name', '-l', dest='last-name', default=None,
+                        help="First name for the user."),
         )
 
         super(Command, self).__init__()
@@ -53,4 +53,3 @@ class Command(BaseCommand):
         token = generate_token(email=email, username=username,
                                first_name=first_name, last_name=last_name)
         self.stdout.write('Token:  {0}'.format(token))
-

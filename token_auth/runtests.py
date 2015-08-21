@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 import sys
 
-import django
 from django.conf import settings
+
 
 if not settings.configured:
     settings.configure(
@@ -21,6 +21,7 @@ if not settings.configured:
 
 from django_nose import NoseTestSuiteRunner
 
+
 def runtests(*test_labels):
     runner = NoseTestSuiteRunner(verbosity=3, interactive=True)
     failures = runner.run_tests(test_labels)
@@ -29,4 +30,3 @@ def runtests(*test_labels):
 
 if __name__ == '__main__':
     runtests(*sys.argv[1:])
-
