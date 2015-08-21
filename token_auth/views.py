@@ -1,8 +1,7 @@
 import urllib
-import json
 
 from django.http.response import HttpResponseRedirect, HttpResponse
-from django.views.generic.base import View, TemplateView, RedirectView
+from django.views.generic.base import View, TemplateView
 from django.utils.module_loading import import_by_path
 from django.core.exceptions import ImproperlyConfigured
 
@@ -75,7 +74,6 @@ class TokenLogoutView(TemplateView):
     template_name = 'token/token-logout.tpl'
 
     def get(self, request, *args, **kwargs):
-        link = kwargs.get('link')
         auth = get_auth(request, **kwargs)
         url = auth.process_logout()
         if url:

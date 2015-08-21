@@ -2,6 +2,7 @@ import logging
 import urllib
 
 from django.contrib.auth import get_user_model
+
 from token_auth.utils import get_settings
 
 logger = logging.getLogger(__name__)

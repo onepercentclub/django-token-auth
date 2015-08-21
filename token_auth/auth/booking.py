@@ -40,6 +40,7 @@ def _encode_message(message):
 
     return aes_message, hmac_digest
 
+
 def generate_token(email, username, first_name, last_name):
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     message = 'time={0}|username={1}|name={2} {3}|' \
