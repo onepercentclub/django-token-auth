@@ -1,11 +1,8 @@
 import logging
-from datetime import datetime, timedelta
 
 from django.contrib.auth import get_user_model
 
-from token_auth.exceptions import TokenAuthenticationError
 from token_auth.utils import get_settings
-from ..models import CheckedToken
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +48,7 @@ class BaseTokenAuthentication(object):
         Get or create the user.
         """
         return USER_MODEL.objects.get_or_create(email=data['email'])
-    
+
     def finalize(self, user, data):
         """
         Finalize the request. Used for example to store used tokens,

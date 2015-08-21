@@ -75,7 +75,6 @@ class TestBookingTokenAuthentication(TestCase):
         with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS):
             self.assertEqual(self.auth_backend.sso_url(), TOKEN_AUTH_SETTINGS['sso_url'])
 
-
     def test_check_hmac_signature_ok(self):
         """
         Tests that the method to check up HMAC signature of the token message

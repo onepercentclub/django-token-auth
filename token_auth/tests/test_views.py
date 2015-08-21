@@ -1,5 +1,3 @@
-import json
-
 from django.test import TestCase, RequestFactory
 from django.core.exceptions import ImproperlyConfigured
 
