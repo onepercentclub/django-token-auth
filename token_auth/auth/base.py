@@ -26,6 +26,10 @@ class BaseTokenAuthentication(object):
 
         return url
 
+    @property
+    def target_url(self):
+        return None
+
     def authenticate_request(self):
         """
         Authenticate the request. Should return a dict containing data

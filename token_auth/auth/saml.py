@@ -18,7 +18,7 @@ def get_saml_request(request):
         'https': 'on' if https else 'off',
         'http_host': http_host,
         'script_name': request.META['PATH_INFO'],
-        'get_data': request.GET.copy(),
+        'get_data': request.GET.copy() or request.POST.copy(),
         'post_data': request.POST.copy()
     }
 
@@ -36,10 +36,11 @@ class SAMLAuthentication(BaseTokenAuthentication):
                                         self.settings)
 
     def sso_url(self, target_url=None):
-        if target_url:
-            return self.auth.login(return_to=target_url)
-        else:
-            return self.auth.login()
+        return self.auth.login(return_to=target_url)
+
+    @property
+    def target_url(self):
+        return self.request.POST.get('RelayState')
 
     def get_metadata(self):
         saml_settings = OneLogin_Saml2_Settings(settings=self.settings,
@@ -65,7 +66,6 @@ class SAMLAuthentication(BaseTokenAuthentication):
         }
 
     def authenticate_request(self):
-
         self.auth.process_response()
 
         if self.auth.is_authenticated():
