@@ -8,6 +8,9 @@ from token_auth.exceptions import TokenAuthenticationError
 from token_auth.views import get_auth, TokenRedirectView, TokenLoginView
 
 
+DUMMY_AUTH = {'backend': 'token_auth.tests.test_views.DummyAuthentication', 'sso_url': 'http://example.com/sso'}
+
+
 class DummyUser(object):
     def get_jwt_token(self):
         return 'test-token'
@@ -41,7 +44,7 @@ class ConfigureAuthenticationClassTestCase(TestCase):
                 request
             )
 
-DUMMY_AUTH = {'backend': 'token_auth.tests.test_views.DummyAuthentication', 'sso_url': 'http://example.com/sso'}
+
 class RedirectViewTestCase(TestCase):
     def setUp(self):
         self.view = TokenRedirectView()
