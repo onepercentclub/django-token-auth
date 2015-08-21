@@ -8,10 +8,8 @@ if not settings.configured:
     settings.configure(
         DATABASES={'default': {'ENGINE': 'django.db.backends.sqlite3'}},
         USER_AUTH_MODEL='auth.User',
-        SOUTH_TESTS_MIGRATE = False,
         USE_TZ=True,
         INSTALLED_APPS=(
-            'south',
             'django.contrib.auth',
             'django.contrib.contenttypes',
             'django_nose',
