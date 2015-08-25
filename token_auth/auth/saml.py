@@ -1,4 +1,5 @@
 from onelogin.saml2.auth import OneLogin_Saml2_Auth
+from onelogin.saml2.errors import OneLogin_Saml2_Error
 from onelogin.saml2.settings import OneLogin_Saml2_Settings
 
 from token_auth.exceptions import TokenAuthenticationError
@@ -59,14 +60,17 @@ class SAMLAuthentication(BaseTokenAuthentication):
             return url
 
     def parse_user(self, user_data):
-        return {
-            'email': user_data['User.email'][0],
-            'first_name': user_data['User.FirstName'][0],
-            'last_name': user_data['User.LastName'][0]
-        }
+        data = {}
+        for target, source in self.settings['assertion_mapping'].items():
+            data[target] = user_data[source][0]
+
+        return data
 
     def authenticate_request(self):
-        self.auth.process_response()
+        try:
+            self.auth.process_response()
+        except OneLogin_Saml2_Error, e:
+            raise TokenAuthenticationError(e)
 
         if self.auth.is_authenticated():
             user_data = self.auth.get_attributes()
