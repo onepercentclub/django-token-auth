@@ -1,4 +1,5 @@
 import urlparse
+import os
 import base64
 import hashlib
 import hmac
@@ -18,6 +19,10 @@ from .factories import CheckedTokenFactory
 
 TOKEN_AUTH_SETTINGS = {
     'backend': 'token_auth.auth.booking.SAMLAuthentication',
+    'assertion_mapping': {
+        'email': 'mail',
+        'username': 'uid'
+    },
     "strict": False,
     "debug": False,
     "custom_base_path": "../../../tests/data/customPath/",
@@ -103,3 +108,68 @@ class TestSAMLTokenAuthentication(TestCase):
 
             self.assertTrue('SAMLRequest' in query)
             self.assertEqual(query['RelayState'][0], '/test')
+
+    def test_auth_succes(self):
+        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS):
+            filename = os.path.join(
+                os.path.dirname(__file__), 'data/valid_response.xml.base64'
+            )
+            with open(filename) as response_file:
+                response = response_file.read()
+
+            request = RequestFactory().post('/sso/auth', HTTP_HOST='www.stuff.com', data={'SAMLResponse': response})
+            auth_backend = SAMLAuthentication(request)
+
+            user, created = auth_backend.authenticate()
+
+            self.assertTrue(created)
+
+            self.assertEqual(user.username, 'smartin')
+            self.assertEqual(user.email, 'smartin@yaco.es')
+
+    def test_auth_custom_target(self):
+        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS):
+            filename = os.path.join(
+                os.path.dirname(__file__), 'data/valid_response.xml.base64'
+            )
+            with open(filename) as response_file:
+                response = response_file.read()
+
+            request = RequestFactory().post(
+                '/sso/auth',
+                HTTP_HOST='www.stuff.com',
+                data={'SAMLResponse': response, 'RelayState': '/test'}
+            )
+            auth_backend = SAMLAuthentication(request)
+
+            self.assertEqual(auth_backend.target_url, '/test')
+
+    def test_auth_invalid(self):
+        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS):
+            filename = os.path.join(
+                os.path.dirname(__file__), 'data/invalid_response.xml.base64'
+            )
+            with open(filename) as response_file:
+                response = response_file.read()
+
+            request = RequestFactory().post(
+                '/sso/auth',
+                HTTP_HOST='www.stuff.com',
+                data={'SAMLResponse': response}
+            )
+            auth_backend = SAMLAuthentication(request)
+
+            self.assertRaises(
+                TokenAuthenticationError,
+                auth_backend.authenticate
+            )
+
+    def test_auth_no_response(self):
+        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS):
+            request = RequestFactory().post('/sso/auth', HTTP_HOST='www.stuff.com')
+            auth_backend = SAMLAuthentication(request)
+
+            self.assertRaises(
+                TokenAuthenticationError,
+                auth_backend.authenticate
+            )
