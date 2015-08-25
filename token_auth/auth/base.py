@@ -1,4 +1,5 @@
 import logging
+import urllib
 
 from django.contrib.auth import get_user_model
 
@@ -19,8 +20,16 @@ class BaseTokenAuthentication(object):
 
         self.settings = get_settings()
 
-    def sso_url(self):
-        return self.settings['sso_url']
+    def sso_url(self, target_url=None):
+        url = self.settings['sso_url']
+        if target_url:
+            url += '?{}'.format(urllib.urlencode({'url': target_url}))
+
+        return url
+
+    @property
+    def target_url(self):
+        return None
 
     def authenticate_request(self):
         """

@@ -1,10 +1,14 @@
+import urllib
+
 from django.test import TestCase, RequestFactory
 from django.core.exceptions import ImproperlyConfigured
 
-
-from token_auth.auth import booking
+from token_auth.auth import booking, base
 from token_auth.exceptions import TokenAuthenticationError
 from token_auth.views import get_auth, TokenRedirectView, TokenLoginView
+
+
+DUMMY_AUTH = {'backend': 'token_auth.tests.test_views.DummyAuthentication', 'sso_url': 'http://example.com/sso'}
 
 
 class DummyUser(object):
@@ -12,13 +16,7 @@ class DummyUser(object):
         return 'test-token'
 
 
-class DummyAuthentication(object):
-    def __init__(self, request, **kwargs):
-        self.request = request
-
-    def sso_url(self):
-        return 'http://example.com/sso'
-
+class DummyAuthentication(base.BaseTokenAuthentication):
     def authenticate(self):
         if getattr(self.request, 'fails', False):
             raise TokenAuthenticationError('test message')
@@ -53,9 +51,18 @@ class RedirectViewTestCase(TestCase):
         self.factory = RequestFactory()
 
     def test_get(self):
-        with self.settings(TOKEN_AUTH={'backend': 'token_auth.tests.test_views.DummyAuthentication'}):
+        with self.settings(TOKEN_AUTH=DUMMY_AUTH):
             response = self.view.get(self.factory.get('/api/sso/redirect'))
             expected_url = 'http://example.com/sso'
+            self.assertEqual(response.status_code, 302)
+            self.assertEqual(response.url, expected_url)
+
+    def test_get_custom_target(self):
+        with self.settings(TOKEN_AUTH=DUMMY_AUTH):
+            response = self.view.get(
+                self.factory.get('/api/sso/redirect?' + urllib.urlencode({'url': '/test/'}))
+            )
+            expected_url = 'http://example.com/sso?' + urllib.urlencode({'url': '/test/'})
             self.assertEqual(response.status_code, 302)
             self.assertEqual(response.url, expected_url)
 
@@ -80,7 +87,7 @@ class LoginViewTestCase(TestCase):
 
             self.assertEqual(response.status_code, 302)
             self.assertEqual(
-                response['Location'], '/go/login-with/{}?%2Ftest'.format(DummyUser().get_jwt_token())
+                response['Location'], '/go/login-with/{}?next=%2Ftest'.format(DummyUser().get_jwt_token())
             )
 
     def test_get_authentication_failed(self):

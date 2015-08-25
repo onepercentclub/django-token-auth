@@ -1,4 +1,5 @@
 from onelogin.saml2.auth import OneLogin_Saml2_Auth
+from onelogin.saml2.errors import OneLogin_Saml2_Error
 from onelogin.saml2.settings import OneLogin_Saml2_Settings
 
 from token_auth.exceptions import TokenAuthenticationError
@@ -18,7 +19,7 @@ def get_saml_request(request):
         'https': 'on' if https else 'off',
         'http_host': http_host,
         'script_name': request.META['PATH_INFO'],
-        'get_data': request.GET.copy(),
+        'get_data': request.GET.copy() or request.POST.copy(),
         'post_data': request.POST.copy()
     }
 
@@ -35,8 +36,12 @@ class SAMLAuthentication(BaseTokenAuthentication):
         self.auth = OneLogin_Saml2_Auth(get_saml_request(request),
                                         self.settings)
 
-    def sso_url(self):
-        return self.auth.login()
+    def sso_url(self, target_url=None):
+        return self.auth.login(return_to=target_url)
+
+    @property
+    def target_url(self):
+        return self.request.POST.get('RelayState')
 
     def get_metadata(self):
         saml_settings = OneLogin_Saml2_Settings(settings=self.settings,
@@ -55,15 +60,17 @@ class SAMLAuthentication(BaseTokenAuthentication):
             return url
 
     def parse_user(self, user_data):
-        return {
-            'email': user_data['User.email'][0],
-            'first_name': user_data['User.FirstName'][0],
-            'last_name': user_data['User.LastName'][0]
-        }
+        data = {}
+        for target, source in self.settings['assertion_mapping'].items():
+            data[target] = user_data[source][0]
+
+        return data
 
     def authenticate_request(self):
-
-        self.auth.process_response()
+        try:
+            self.auth.process_response()
+        except OneLogin_Saml2_Error, e:
+            raise TokenAuthenticationError(e)
 
         if self.auth.is_authenticated():
             user_data = self.auth.get_attributes()

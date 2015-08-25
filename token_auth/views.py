@@ -35,7 +35,7 @@ class TokenRedirectView(View):
 
     def get(self, request, *args, **kwargs):
         auth = get_auth(request, **kwargs)
-        sso_url = auth.sso_url()
+        sso_url = auth.sso_url(target_url=request.GET.get('url'))
         return HttpResponseRedirect(sso_url)
 
 
@@ -43,10 +43,8 @@ class TokenLoginView(View):
     """
     Parse GET/POST request and login through set Authentication backend
     """
-
-    def parse_request(self, request, *args, **kwargs):
-        link = kwargs.get('link')
-        auth = get_auth(request, **kwargs)
+    def get(self, request, link=None, token=None):
+        auth = get_auth(request)
 
         try:
             user, created = auth.authenticate()
@@ -55,18 +53,16 @@ class TokenLoginView(View):
             url = '/token/error?message={0}'.format(e)
             return HttpResponseRedirect(url)
 
+        url = "/go/login-with/{0}".format(user.get_jwt_token())
+
         if link:
-            return HttpResponseRedirect("/go/login-with/{0}?{1}".format(
-                user.get_jwt_token(), urllib.quote_plus(link)))
+            url += '?{}'.format(urllib.urlencode({'next': link}))
+        elif auth.target_url:
+            url += '?{}'.format(urllib.urlencode({'next': auth.target_url}))
 
-        return HttpResponseRedirect("/go/login-with/{0}".format(
-            user.get_jwt_token()))
+        return HttpResponseRedirect(url)
 
-    def get(self, request, *args, **kwargs):
-        return self.parse_request(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        return self.parse_request(request, *args, **kwargs)
+    post = get
 
 
 class TokenLogoutView(TemplateView):
