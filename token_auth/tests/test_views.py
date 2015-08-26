@@ -1,4 +1,5 @@
 import urllib
+from mock import patch
 
 from django.test import TestCase, RequestFactory
 from django.core.exceptions import ImproperlyConfigured
@@ -8,7 +9,7 @@ from token_auth.exceptions import TokenAuthenticationError
 from token_auth.views import get_auth, TokenRedirectView, TokenLoginView
 
 
-DUMMY_AUTH = {'backend': 'token_auth.tests.test_views.DummyAuthentication', 'sso_url': 'http://example.com/sso'}
+DUMMY_AUTH = {'backend': 'token_auth.tests.test_views.DummyAuthentication'}
 
 
 class DummyUser(object):
@@ -50,21 +51,26 @@ class RedirectViewTestCase(TestCase):
         self.view = TokenRedirectView()
         self.factory = RequestFactory()
 
-    def test_get(self):
+    @patch.object(DummyAuthentication, 'sso_url', return_value='http://example.com/sso')
+    def test_get(self, sso_url):
         with self.settings(TOKEN_AUTH=DUMMY_AUTH):
             response = self.view.get(self.factory.get('/api/sso/redirect'))
             expected_url = 'http://example.com/sso'
+
+            sso_url.assert_called_once_with(target_url=None)
             self.assertEqual(response.status_code, 302)
             self.assertEqual(response.url, expected_url)
 
-    def test_get_custom_target(self):
+    @patch.object(DummyAuthentication, 'sso_url', return_value='http://example.com/sso')
+    def test_get_custom_target(self, sso_url):
         with self.settings(TOKEN_AUTH=DUMMY_AUTH):
             response = self.view.get(
                 self.factory.get('/api/sso/redirect?' + urllib.urlencode({'url': '/test/'}))
             )
-            expected_url = 'http://example.com/sso?' + urllib.urlencode({'url': '/test/'})
+
+            sso_url.assert_called_once_with(target_url='/test/')
             self.assertEqual(response.status_code, 302)
-            self.assertEqual(response.url, expected_url)
+            self.assertEqual(response.url, 'http://example.com/sso')
 
 
 class LoginViewTestCase(TestCase):
