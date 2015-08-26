@@ -1,5 +1,4 @@
 import logging
-import urllib
 
 from django.contrib.auth import get_user_model
 
@@ -21,11 +20,7 @@ class BaseTokenAuthentication(object):
         self.settings = get_settings()
 
     def sso_url(self, target_url=None):
-        url = self.settings['sso_url']
-        if target_url:
-            url += '?{}'.format(urllib.urlencode({'url': target_url}))
-
-        return url
+        raise NotImplemented()
 
     @property
     def target_url(self):
@@ -72,8 +67,7 @@ class BaseTokenAuthentication(object):
         pass
 
     def get_metadata(self):
-        metadata = "<sso-url>{0}</sso-url>".format(self.sso_url())
-        return metadata
+        raise NotImplemented()
 
     def authenticate(self):
         data = self.authenticate_request()

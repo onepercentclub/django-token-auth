@@ -3,6 +3,7 @@ import hashlib
 import hmac
 import logging
 import re
+import urllib
 from datetime import timedelta
 import string
 from datetime import datetime
@@ -165,6 +166,17 @@ class TokenAuthentication(BaseTokenAuthentication):
         }
 
         return data
+
+    def get_metadata(self):
+        metadata = "<sso-url>{0}</sso-url>".format(self.sso_url())
+        return metadata
+
+    def sso_url(self, target_url=None):
+        url = self.settings['sso_url']
+        if target_url:
+            url += '?{}'.format(urllib.urlencode({'url': target_url}))
+
+        return url
 
     def authenticate_request(self):
         self.check_token_used()
