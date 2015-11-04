@@ -11,7 +11,7 @@ class CheckedToken(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
 
     class Meta:
-        ordering = ('timestamp', 'user__username')
+        ordering = ('-timestamp', 'user__username')
 
     def __unicode__(self):
         return '{0} - {1}, {2}'.format(
