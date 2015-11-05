@@ -26,7 +26,8 @@ setuptools.setup(
     tests_require=[
         'django_nose==1.4',
         'factory-boy==2.3.1',
-        'pycrypto==2.6.1'
+        'pycrypto==2.6.1',
+        'mock==1.0.1',
     ],
     test_suite="token_auth.runtests.runtests",
     classifiers=[
