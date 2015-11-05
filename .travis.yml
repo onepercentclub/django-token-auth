@@ -13,11 +13,13 @@ addons:
     packages:
     - libxmlsec1
     - libxmlsec1-dev
+    - libxml2
+    - libxslt1-dev
     - swig
 install:
-- pip install --upgrade setuptools pip
-- pip install flake8
-- pip install python-saml==2.1.4 Django==1.6.8 pycrypto==2.6.1 --use-wheel --find-links=https://stream.onepercentclub.com/wheelhouse/  --process-dependency-links --find-links=https://stream.onepercentclub.com/wheelhouse/
+- pip install --upgrade setuptools pip --use-mirrors
+- pip install flake8 lxml
+- pip install -e .[test] --process-dependency-links
 before_script:
     flake8 .
 script:
