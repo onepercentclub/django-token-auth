@@ -26,7 +26,6 @@ TOKEN_AUTH_SETTINGS = {
 }
 
 
-
 class TestBookingTokenAuthentication(TestCase):
     """
     Tests the Token Authentication backend.
@@ -255,13 +254,12 @@ class TestBookingTokenAuthentication(TestCase):
             self.assertEqual(checked_token.token, token)
             self.assertEqual(checked_token.user, user)
 
-
     @mock.patch.object(get_user_model(), 'get_jwt_token', create=True, return_value='tralala')
     def test_login_view(self, get_jwt_token):
         """
         Test the login view for booking
         """
-        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS,ROOT_URLCONF='token_auth.urls'):
+        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS, ROOT_URLCONF='token_auth.urls'):
             timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             message = 'time={0}|username=johndoe|name=John Doe|' \
                       'email=john.doe@example.com'.format(timestamp)
