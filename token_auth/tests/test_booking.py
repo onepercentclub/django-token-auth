@@ -2,11 +2,13 @@ import base64
 import hashlib
 import hmac
 from datetime import datetime, timedelta
-
 from Crypto.Cipher import AES
 from Crypto import Random
-from django.test import TestCase, RequestFactory
+import mock
 
+from django.contrib.auth import get_user_model
+from django.core.urlresolvers import reverse
+from django.test import TestCase, RequestFactory
 
 from token_auth.exceptions import TokenAuthenticationError
 from token_auth.auth.booking import TokenAuthentication
@@ -22,6 +24,7 @@ TOKEN_AUTH_SETTINGS = {
     'hmac_key': 'bbbbbbbbbbbbbbbb',
     'aes_key': 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
 }
+
 
 
 class TestBookingTokenAuthentication(TestCase):
@@ -251,3 +254,24 @@ class TestBookingTokenAuthentication(TestCase):
             checked_token = CheckedToken.objects.latest('pk')
             self.assertEqual(checked_token.token, token)
             self.assertEqual(checked_token.user, user)
+
+
+    @mock.patch.object(get_user_model(), 'get_jwt_token', create=True, return_value='tralala')
+    def test_login_view(self, get_jwt_token):
+        """
+        Test the login view for booking
+        """
+        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS,ROOT_URLCONF='token_auth.urls'):
+            timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            message = 'time={0}|username=johndoe|name=John Doe|' \
+                      'email=john.doe@example.com'.format(timestamp)
+            aes_message, hmac_digest = self._encode_message(message)
+            token = base64.urlsafe_b64encode(aes_message + hmac_digest.digest())
+
+            login_url = reverse('token-login', kwargs={'token': token})
+            response = self.client.get(login_url)
+            self.assertEqual(response.status_code, 302)
+            self.assertEqual(
+                response['Location'],
+                "http://testserver/login-with/tralala"
+            )
