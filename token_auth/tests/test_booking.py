@@ -279,7 +279,7 @@ class TestBookingTokenAuthentication(TestCase):
         """
         Test the link view for booking
         """
-        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS,ROOT_URLCONF='token_auth.urls'):
+        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS, ROOT_URLCONF='token_auth.urls'):
             timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             message = 'time={0}|username=johndoe|name=John Doe|' \
                       'email=john.doe@example.com'.format(timestamp)
@@ -292,4 +292,18 @@ class TestBookingTokenAuthentication(TestCase):
             self.assertEqual(
                 response['Location'],
                 "http://testserver/login-with/tralala?next=%2Fprojects%2Fmy-project"
+            )
+
+
+    def test_redirect_view(self):
+        """
+        Test the redirect view for booking
+        """
+        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS, ROOT_URLCONF='token_auth.urls'):
+            redirect_url = reverse('token-redirect')
+            response = self.client.get(redirect_url,  {'url': '/projects/my-project'})
+            self.assertEqual(response.status_code, 302)
+            self.assertEqual(
+                response['Location'],
+                "https://example.org?url=%2Fprojects%2Fmy-project"
             )
