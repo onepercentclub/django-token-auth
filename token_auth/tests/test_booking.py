@@ -294,7 +294,6 @@ class TestBookingTokenAuthentication(TestCase):
                 "http://testserver/login-with/tralala?next=%2Fprojects%2Fmy-project"
             )
 
-
     def test_redirect_view(self):
         """
         Test the redirect view for booking
