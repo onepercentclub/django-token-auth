@@ -275,3 +275,23 @@ class TestBookingTokenAuthentication(TestCase):
                 response['Location'],
                 "http://testserver/login-with/tralala"
             )
+
+    @mock.patch.object(get_user_model(), 'get_jwt_token', create=True, return_value='tralala')
+    def test_link_view(self, get_jwt_token):
+        """
+        Test the link view for booking
+        """
+        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS,ROOT_URLCONF='token_auth.urls'):
+            timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            message = 'time={0}|username=johndoe|name=John Doe|' \
+                      'email=john.doe@example.com'.format(timestamp)
+            aes_message, hmac_digest = self._encode_message(message)
+            token = base64.urlsafe_b64encode(aes_message + hmac_digest.digest())
+
+            login_url = reverse('token-login-link', kwargs={'token': token, 'link': '/projects/my-project'})
+            response = self.client.get(login_url)
+            self.assertEqual(response.status_code, 302)
+            self.assertEqual(
+                response['Location'],
+                "http://testserver/login-with/tralala?next=%2Fprojects%2Fmy-project"
+            )
