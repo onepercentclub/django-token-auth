@@ -44,7 +44,7 @@ class TokenLoginView(View):
     Parse GET/POST request and login through set Authentication backend
     """
     def get(self, request, link=None, token=None):
-        auth = get_auth(request)
+        auth = get_auth(request, token=token, link=link)
 
         try:
             user, created = auth.authenticate()
@@ -53,7 +53,7 @@ class TokenLoginView(View):
             url = '/token/error?message={0}'.format(e)
             return HttpResponseRedirect(url)
 
-        url = "/go/login-with/{0}".format(user.get_jwt_token())
+        url = "/login-with/{0}".format(user.get_jwt_token())
 
         if link:
             url += '?{}'.format(urllib.urlencode({'next': link}))

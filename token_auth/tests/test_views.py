@@ -84,7 +84,7 @@ class LoginViewTestCase(TestCase):
 
             self.assertEqual(response.status_code, 302)
             self.assertEqual(
-                response['Location'], '/go/login-with/{}'.format(DummyUser().get_jwt_token())
+                response['Location'], '/login-with/{}'.format(DummyUser().get_jwt_token())
             )
 
     def test_get_link(self):
@@ -93,7 +93,8 @@ class LoginViewTestCase(TestCase):
 
             self.assertEqual(response.status_code, 302)
             self.assertEqual(
-                response['Location'], '/go/login-with/{}?next=%2Ftest'.format(DummyUser().get_jwt_token())
+                response['Location'],
+                '/login-with/{}?next=%2Ftest'.format(DummyUser().get_jwt_token())
             )
 
     def test_get_authentication_failed(self):
@@ -105,5 +106,6 @@ class LoginViewTestCase(TestCase):
 
             self.assertEqual(response.status_code, 302)
             self.assertEqual(
-                response['Location'], "/token/error?message='test%20message'"
+                response['Location'],
+                "/token/error?message='test%20message'"
             )
