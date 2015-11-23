@@ -89,7 +89,7 @@ class LoginViewTestCase(TestCase):
 
     def test_get_link(self):
         with self.settings(TOKEN_AUTH={'backend': 'token_auth.tests.test_views.DummyAuthentication'}):
-            response = self.view.get(self.factory.get('/api/sso/authenticate'), link='/test')
+            response = self.view.get(self.factory.get('/api/sso/authenticate'), link='test')
 
             self.assertEqual(response.status_code, 302)
             self.assertEqual(
