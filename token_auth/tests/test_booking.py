@@ -286,7 +286,7 @@ class TestBookingTokenAuthentication(TestCase):
             aes_message, hmac_digest = self._encode_message(message)
             token = base64.urlsafe_b64encode(aes_message + hmac_digest.digest())
 
-            login_url = reverse('token-login-link', kwargs={'token': token, 'link': '/projects/my-project'})
+            login_url = reverse('token-login-link', kwargs={'token': token, 'link': 'projects/my-project'})
             response = self.client.get(login_url)
             self.assertEqual(response.status_code, 302)
             self.assertEqual(
