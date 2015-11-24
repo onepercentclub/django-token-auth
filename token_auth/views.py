@@ -56,7 +56,7 @@ class TokenLoginView(View):
         url = "/login-with/{0}".format(user.get_jwt_token())
 
         if link:
-            url += '?{}'.format(urllib.urlencode({'next': "/%s" % link}))
+            url += '?{}'.format(urllib.urlencode({'next': link}))
         elif auth.target_url:
             url += '?{}'.format(urllib.urlencode({'next': auth.target_url}))
 
