@@ -1,9 +1,14 @@
+import logging
+
 from onelogin.saml2.auth import OneLogin_Saml2_Auth
 from onelogin.saml2.errors import OneLogin_Saml2_Error
 from onelogin.saml2.settings import OneLogin_Saml2_Settings
 
 from token_auth.exceptions import TokenAuthenticationError
 from token_auth.auth.base import BaseTokenAuthentication
+
+
+logger = logging.getLogger(__name__)
 
 
 def get_saml_request(request):
@@ -49,6 +54,7 @@ class SAMLAuthentication(BaseTokenAuthentication):
         metadata = saml_settings.get_sp_metadata()
         errors = saml_settings.validate_metadata(metadata)
         if len(errors):
+            logger.error('Saml configuration error: {}'.format(errors))
             raise TokenAuthenticationError(', '.join(errors))
         return metadata
 
@@ -70,6 +76,7 @@ class SAMLAuthentication(BaseTokenAuthentication):
         try:
             self.auth.process_response()
         except OneLogin_Saml2_Error, e:
+            logger.error('Saml login error: {}'.format(e))
             raise TokenAuthenticationError(e)
 
         if self.auth.is_authenticated():
@@ -77,4 +84,10 @@ class SAMLAuthentication(BaseTokenAuthentication):
 
             return self.parse_user(user_data)
         else:
+            logger.error(
+                'Saml login error: {}, reason: {}'.format(
+                    self.auth.get_errors(), self.auth.get_last_error_reason()
+                )
+            )
+
             raise TokenAuthenticationError(self.auth.get_errors())

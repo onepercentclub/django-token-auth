@@ -1,8 +1,8 @@
 import urlparse
 import os
 
+from mock import patch
 from django.test import TestCase, RequestFactory
-
 
 from token_auth.exceptions import TokenAuthenticationError
 from token_auth.auth.saml import SAMLAuthentication
@@ -149,7 +149,8 @@ class TestSAMLTokenAuthentication(TestCase):
 
             self.assertEqual(auth_backend.target_url, '/test')
 
-    def test_auth_invalid(self):
+    @patch('token_auth.auth.saml.logger.error')
+    def test_auth_invalid(self, error):
         with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS):
             filename = os.path.join(
                 os.path.dirname(__file__), 'data/invalid_response.xml.base64'
@@ -168,8 +169,13 @@ class TestSAMLTokenAuthentication(TestCase):
                 TokenAuthenticationError,
                 auth_backend.authenticate
             )
+            error.assert_called_with((
+                'Saml login error: [\'invalid_response\'], reason: '
+                'Signature validation failed. SAML Response rejected'
+            ))
 
-    def test_auth_no_response(self):
+    @patch('token_auth.auth.saml.logger.error')
+    def test_auth_no_response(self, error):
         with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS):
             request = RequestFactory().post('/sso/auth', HTTP_HOST='www.stuff.com')
             auth_backend = SAMLAuthentication(request)
@@ -178,3 +184,8 @@ class TestSAMLTokenAuthentication(TestCase):
                 TokenAuthenticationError,
                 auth_backend.authenticate
             )
+
+            error.assert_called_with((
+                'Saml login error: SAML Response not found, '
+                'Only supported HTTP_POST Binding'
+            ))
