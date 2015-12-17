@@ -159,6 +159,7 @@ class TokenAuthentication(BaseTokenAuthentication):
 
         data = {
             'timestamp': login_data[0],
+            'remote_id': email,
             'email': email,
             'first_name': first_name,
             'last_name': last_name,

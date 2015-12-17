@@ -51,7 +51,7 @@ class BaseTokenAuthentication(object):
         """
         Get or create the user.
         """
-        return USER_MODEL.objects.get_or_create(email=data['email'])
+        return USER_MODEL.objects.get_or_create(remote_id=data['remote_id'])
 
     def finalize(self, user, data):
         """
