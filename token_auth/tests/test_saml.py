@@ -12,6 +12,7 @@ TOKEN_AUTH_SETTINGS = {
     'backend': 'token_auth.auth.booking.SAMLAuthentication',
     'assertion_mapping': {
         'email': 'mail',
+        'remote_id': 'remoteId',
         'username': 'uid'
     },
     "strict": False,

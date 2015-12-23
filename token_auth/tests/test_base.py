@@ -14,7 +14,8 @@ class TestBaseTokenAuthentication(TestCase):
             self.auth = BaseTokenAuthentication(None)
 
     @patch.object(
-        BaseTokenAuthentication, 'authenticate_request', return_value={'email': 'test@example.com'}
+        BaseTokenAuthentication, 'authenticate_request', return_value={'remote_id': 'test@example.com',
+                                                                       'email': 'test@example.com'}
     )
     def test_user_created(self, authenticate_request):
         """ When the user is succesfully authenticated, a new user should
@@ -27,7 +28,8 @@ class TestBaseTokenAuthentication(TestCase):
         self.assertEqual(user.email, 'test@example.com')
 
     @patch.object(
-        BaseTokenAuthentication, 'authenticate_request', return_value={'email': 'test@example.com'}
+        BaseTokenAuthentication, 'authenticate_request', return_value={'remote_id': 'test@example.com',
+                                                                       'email': 'test@example.com'}
     )
     def test_user_already_exists(self, authenticate_request):
         get_user_model()(email='test@example.com').save()
@@ -41,7 +43,7 @@ class TestBaseTokenAuthentication(TestCase):
     @patch.object(
         BaseTokenAuthentication,
         'authenticate_request',
-        return_value={'email': 'test@example.com', 'first_name': 'updated'}
+        return_value={'remote_id': 'test@example.com', 'email': 'test@example.com', 'first_name': 'updated'}
     )
     def test_user_already_exists_attributes_updated(self, authenticate_request):
         get_user_model()(email='test@example.com', first_name='test').save()

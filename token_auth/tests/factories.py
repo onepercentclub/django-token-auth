@@ -14,6 +14,7 @@ class UserFactory(factory.DjangoModelFactory):
     first_name = 'Renko'
     last_name = 'ter Kuile'
     email = 'renko.terkuile@example.com'
+    remote_id = 'renko@gmail.com'
 
 
 class CheckedTokenFactory(factory.DjangoModelFactory):
