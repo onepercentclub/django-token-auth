@@ -6,8 +6,6 @@ from token_auth.utils import get_settings
 
 logger = logging.getLogger(__name__)
 
-USER_MODEL = get_user_model()
-
 
 class BaseTokenAuthentication(object):
     """
@@ -51,8 +49,7 @@ class BaseTokenAuthentication(object):
         """
         Get or create the user.
         """
-        print "DATA: ", data
-        return USER_MODEL.objects.get_or_create(remote_id=data['remote_id'])
+        return get_user_model().objects.get_or_create(remote_id=data['remote_id'])
 
     def finalize(self, user, data):
         """

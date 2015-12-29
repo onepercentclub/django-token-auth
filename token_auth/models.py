@@ -16,3 +16,17 @@ class CheckedToken(models.Model):
     def __unicode__(self):
         return '{0} - {1}, {2}'.format(
             self.token, self.timestamp, self.user.username)
+
+from django.contrib.auth import get_user_model
+from django.db import models
+from django.utils.translation import ugettext_lazy as _
+
+
+USER_MODEL = get_user_model()
+
+
+class TestUser(USER_MODEL):
+    remote_id = models.CharField(_('remote_id'),
+                                 max_length=75,
+                                 blank=True,
+                                 null=True)

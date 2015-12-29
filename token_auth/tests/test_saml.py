@@ -12,7 +12,7 @@ TOKEN_AUTH_SETTINGS = {
     'backend': 'token_auth.auth.booking.SAMLAuthentication',
     'assertion_mapping': {
         'email': 'mail',
-        'remote_id': 'remoteId',
+        'remote_id': 'mail',
         'username': 'uid'
     },
     "strict": False,
@@ -82,7 +82,7 @@ class TestSAMLTokenAuthentication(TestCase):
     Tests the Token Authentication backend.
     """
     def test_sso_url(self):
-        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS):
+        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS, AUTH_USER_MODEL='token_auth.TestUser'):
             request = RequestFactory().get('/sso/redirect', HTTP_HOST='www.stuff.com')
             auth_backend = SAMLAuthentication(request)
 
@@ -99,7 +99,7 @@ class TestSAMLTokenAuthentication(TestCase):
             self.assertEqual(query['RelayState'][0], 'http://www.stuff.com/sso/redirect')
 
     def test_sso_url_custom_target(self):
-        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS):
+        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS, AUTH_USER_MODEL='token_auth.TestUser'):
             request = RequestFactory().get('/sso/redirect', HTTP_HOST='www.stuff.com')
             auth_backend = SAMLAuthentication(request)
 
@@ -116,7 +116,8 @@ class TestSAMLTokenAuthentication(TestCase):
             self.assertEqual(query['RelayState'][0], '/test')
 
     def test_auth_succes(self):
-        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS):
+        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS, AUTH_USER_MODEL='token_auth.TestUser'):
+
             filename = os.path.join(
                 os.path.dirname(__file__), 'data/valid_response.xml.base64'
             )
@@ -134,7 +135,7 @@ class TestSAMLTokenAuthentication(TestCase):
             self.assertEqual(user.email, 'smartin@yaco.es')
 
     def test_auth_custom_target(self):
-        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS):
+        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS, AUTH_USER_MODEL='token_auth.TestUser'):
             filename = os.path.join(
                 os.path.dirname(__file__), 'data/valid_response.xml.base64'
             )
@@ -152,7 +153,7 @@ class TestSAMLTokenAuthentication(TestCase):
 
     @patch('token_auth.auth.saml.logger.error')
     def test_auth_invalid(self, error):
-        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS):
+        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS, AUTH_USER_MODEL='token_auth.TestUser'):
             filename = os.path.join(
                 os.path.dirname(__file__), 'data/invalid_response.xml.base64'
             )
@@ -177,7 +178,7 @@ class TestSAMLTokenAuthentication(TestCase):
 
     @patch('token_auth.auth.saml.logger.error')
     def test_auth_no_response(self, error):
-        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS):
+        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS, AUTH_USER_MODEL='token_auth.TestUser'):
             request = RequestFactory().post('/sso/auth', HTTP_HOST='www.stuff.com')
             auth_backend = SAMLAuthentication(request)
 
