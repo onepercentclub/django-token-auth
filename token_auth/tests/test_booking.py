@@ -260,7 +260,8 @@ class TestBookingTokenAuthentication(TestCase):
         """
         Test the login view for booking
         """
-        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS, ROOT_URLCONF='token_auth.urls', AUTH_USER_MODEL='token_auth.TestUser'):
+        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS, ROOT_URLCONF='token_auth.urls',
+                           AUTH_USER_MODEL='token_auth.TestUser'):
             timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             message = 'time={0}|username=johndoe|name=John Doe|' \
                       'email=john.doe@example.com'.format(timestamp)
@@ -280,7 +281,8 @@ class TestBookingTokenAuthentication(TestCase):
         """
         Test the link view for booking
         """
-        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS, ROOT_URLCONF='token_auth.urls', AUTH_USER_MODEL='token_auth.TestUser'):
+        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS, ROOT_URLCONF='token_auth.urls',
+                           AUTH_USER_MODEL='token_auth.TestUser'):
             timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             message = 'time={0}|username=johndoe|name=John Doe|' \
                       'email=john.doe@example.com'.format(timestamp)
