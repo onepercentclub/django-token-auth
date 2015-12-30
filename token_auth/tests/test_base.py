@@ -34,7 +34,7 @@ class TestBaseTokenAuthentication(TestCase):
     )
     def test_user_already_exists(self, authenticate_request):
         with self.settings(TOKEN_AUTH={}, AUTH_USER_MODEL='token_auth.TestUser'):
-            get_user_model()(email='test@example.com').save()
+            get_user_model()(remote_id='test@example.com', email='test@example.com').save()
 
             user, created = self.auth.authenticate()
 
@@ -49,7 +49,7 @@ class TestBaseTokenAuthentication(TestCase):
     )
     def test_user_already_exists_attributes_updated(self, authenticate_request):
         with self.settings(TOKEN_AUTH={}, AUTH_USER_MODEL='token_auth.TestUser'):
-            get_user_model()(email='test@example.com', first_name='test').save()
+            get_user_model()(remote_id='test@example.com', email='test@example.com', first_name='test').save()
 
             user, created = self.auth.authenticate()
 
