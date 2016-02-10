@@ -4,7 +4,7 @@ import factory
 from django.utils import timezone
 
 from token_auth.models import CheckedToken
-from token_auth.models import TestUser
+from token_auth.tests.models import TestUser
 
 
 class UserFactory(factory.DjangoModelFactory):

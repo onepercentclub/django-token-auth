@@ -6,14 +6,15 @@ from django.conf import settings
 if not settings.configured:
     settings.configure(
         DATABASES={'default': {'ENGINE': 'django.db.backends.sqlite3'}},
-        USER_AUTH_MODEL='auth.User',
+        USER_AUTH_MODEL='tests.User',
         USE_TZ=True,
         INSTALLED_APPS=(
             'django.contrib.auth',
             'django.contrib.contenttypes',
             'django_nose',
             'factory',
-            'token_auth'
+            'token_auth',
+            'token_auth.tests'
         ),
         MIDDLEWARE_CLASSES=()
     )
