@@ -1,19 +1,20 @@
 import datetime
 import factory
 
-from django.contrib.auth import get_user_model
 from django.utils import timezone
 
 from token_auth.models import CheckedToken
+from token_auth.models import TestUser
 
 
 class UserFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = get_user_model()
+    FACTORY_FOR = TestUser
 
     username = 'rterkuile'
     first_name = 'Renko'
     last_name = 'ter Kuile'
     email = 'renko.terkuile@example.com'
+    remote_id = 'renko@gmail.com'
 
 
 class CheckedTokenFactory(factory.DjangoModelFactory):

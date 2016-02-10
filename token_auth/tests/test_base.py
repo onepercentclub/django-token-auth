@@ -10,45 +10,50 @@ class TestBaseTokenAuthentication(TestCase):
     Tests the Base Token Authentication backend.
     """
     def setUp(self):
-        with self.settings(TOKEN_AUTH={}):
+        with self.settings(TOKEN_AUTH={}, AUTH_USER_MODEL='token_auth.TestUser'):
             self.auth = BaseTokenAuthentication(None)
 
     @patch.object(
-        BaseTokenAuthentication, 'authenticate_request', return_value={'email': 'test@example.com'}
+        BaseTokenAuthentication, 'authenticate_request', return_value={'remote_id': 'test@example.com',
+                                                                       'email': 'test@example.com'}
     )
     def test_user_created(self, authenticate_request):
         """ When the user is succesfully authenticated, a new user should
         be created
         """
-        user, created = self.auth.authenticate()
+        with self.settings(TOKEN_AUTH={}, AUTH_USER_MODEL='token_auth.TestUser'):
+            user, created = self.auth.authenticate()
 
-        self.assertEqual(authenticate_request.call_count, 1)
-        self.assertTrue(created)
-        self.assertEqual(user.email, 'test@example.com')
+            self.assertEqual(authenticate_request.call_count, 1)
+            self.assertTrue(created)
+            self.assertEqual(user.email, 'test@example.com')
 
     @patch.object(
-        BaseTokenAuthentication, 'authenticate_request', return_value={'email': 'test@example.com'}
+        BaseTokenAuthentication, 'authenticate_request', return_value={'remote_id': 'test@example.com',
+                                                                       'email': 'test@example.com'}
     )
     def test_user_already_exists(self, authenticate_request):
-        get_user_model()(email='test@example.com').save()
+        with self.settings(TOKEN_AUTH={}, AUTH_USER_MODEL='token_auth.TestUser'):
+            get_user_model()(remote_id='test@example.com', email='test@example.com').save()
 
-        user, created = self.auth.authenticate()
+            user, created = self.auth.authenticate()
 
-        self.assertEqual(authenticate_request.call_count, 1)
-        self.assertFalse(created)
-        self.assertEqual(user.email, 'test@example.com')
+            self.assertEqual(authenticate_request.call_count, 1)
+            self.assertFalse(created)
+            self.assertEqual(user.email, 'test@example.com')
 
     @patch.object(
         BaseTokenAuthentication,
         'authenticate_request',
-        return_value={'email': 'test@example.com', 'first_name': 'updated'}
+        return_value={'remote_id': 'test@example.com', 'email': 'test@example.com', 'first_name': 'updated'}
     )
     def test_user_already_exists_attributes_updated(self, authenticate_request):
-        get_user_model()(email='test@example.com', first_name='test').save()
+        with self.settings(TOKEN_AUTH={}, AUTH_USER_MODEL='token_auth.TestUser'):
+            get_user_model()(remote_id='test@example.com', email='test@example.com', first_name='test').save()
 
-        user, created = self.auth.authenticate()
+            user, created = self.auth.authenticate()
 
-        self.assertEqual(authenticate_request.call_count, 1)
-        self.assertFalse(created)
-        self.assertEqual(user.email, 'test@example.com')
-        self.assertEqual(user.first_name, 'updated')
+            self.assertEqual(authenticate_request.call_count, 1)
+            self.assertFalse(created)
+            self.assertEqual(user.email, 'test@example.com')
+            self.assertEqual(user.first_name, 'updated')

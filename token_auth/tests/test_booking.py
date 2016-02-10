@@ -31,7 +31,7 @@ class TestBookingTokenAuthentication(TestCase):
     Tests the Token Authentication backend.
     """
     def setUp(self):
-        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS):
+        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS, AUTH_USER_MODEL='token_auth.TestUser'):
             self.request = RequestFactory().get('/api/sso/redirect')
 
             # To keep things easy, let's just change the valid token to put some Xs
@@ -116,7 +116,8 @@ class TestBookingTokenAuthentication(TestCase):
                           'first_name': 'John',
                           'last_name': 'Doe',
                           'email': 'john.doe@example.com',
-                          'username': 'john.doe@example.com'
+                          'username': 'john.doe@example.com',
+                          'remote_id': 'john.doe@example.com'
                           })
 
     def test_get_login_data(self):
@@ -235,7 +236,7 @@ class TestBookingTokenAuthentication(TestCase):
         """
         Tests ``authenticate`` method when it performs a successful login.
         """
-        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS):
+        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS, AUTH_USER_MODEL='token_auth.TestUser'):
             timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             message = 'time={0}|username=johndoe|name=John Doe|' \
                       'email=john.doe@example.com'.format(timestamp)
@@ -252,14 +253,15 @@ class TestBookingTokenAuthentication(TestCase):
             # Check `CheckedToken` related object.
             checked_token = CheckedToken.objects.latest('pk')
             self.assertEqual(checked_token.token, token)
-            self.assertEqual(checked_token.user, user)
+            self.assertEqual(checked_token.user.username, user.username)
 
     @mock.patch.object(get_user_model(), 'get_jwt_token', create=True, return_value='tralala')
     def test_login_view(self, get_jwt_token):
         """
         Test the login view for booking
         """
-        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS, ROOT_URLCONF='token_auth.urls'):
+        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS, ROOT_URLCONF='token_auth.urls',
+                           AUTH_USER_MODEL='token_auth.TestUser'):
             timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             message = 'time={0}|username=johndoe|name=John Doe|' \
                       'email=john.doe@example.com'.format(timestamp)
@@ -279,7 +281,8 @@ class TestBookingTokenAuthentication(TestCase):
         """
         Test the link view for booking
         """
-        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS, ROOT_URLCONF='token_auth.urls'):
+        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS, ROOT_URLCONF='token_auth.urls',
+                           AUTH_USER_MODEL='token_auth.TestUser'):
             timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             message = 'time={0}|username=johndoe|name=John Doe|' \
                       'email=john.doe@example.com'.format(timestamp)
