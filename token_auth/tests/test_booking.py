@@ -303,7 +303,7 @@ class TestBookingTokenAuthentication(TestCase):
         """
         with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS, ROOT_URLCONF='token_auth.urls'):
             redirect_url = reverse('token-redirect')
-            response = self.client.get(redirect_url,  {'url': '/projects/my-project'})
+            response = self.client.get(redirect_url, {'url': '/projects/my-project'})
             self.assertEqual(response.status_code, 302)
             self.assertEqual(
                 response['Location'],

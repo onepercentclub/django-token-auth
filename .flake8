@@ -1,2 +1,2 @@
-[flakee8]
+[flake8]
 ignore = E731
