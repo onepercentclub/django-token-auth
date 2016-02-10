@@ -63,7 +63,7 @@ class TestBookingTokenAuthentication(TestCase):
         encrypted message.
         2. The HMAC-SHA1 hash of that string.
         """
-        pad = lambda s: s + (AES.block_size - len(s) % AES.block_size) * chr(  # noqa
+        pad = lambda s: s + (AES.block_size - len(s) % AES.block_size) * chr(
             AES.block_size - len(s) % AES.block_size)
         init_vector = Random.new().read(AES.block_size)
         cipher = AES.new(self.aes_key, AES.MODE_CBC, init_vector)

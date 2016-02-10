@@ -31,7 +31,7 @@ def _encode_message(message):
     aes_key = get_settings()['aes_key']
     hmac_key = get_settings()['hmac_key']
 
-    pad = lambda s: s + (AES.block_size - len(s) % AES.block_size) * chr(  # noqa
+    pad = lambda s: s + (AES.block_size - len(s) % AES.block_size) * chr(
         AES.block_size - len(s) % AES.block_size)
     init_vector = Random.new().read(AES.block_size)
     cipher = AES.new(aes_key, AES.MODE_CBC, init_vector)
