@@ -3,6 +3,8 @@ import sys
 
 from django.conf import settings
 
+from django_nose import NoseTestSuiteRunner
+
 
 if not settings.configured:
     settings.configure(
@@ -18,8 +20,6 @@ if not settings.configured:
         ),
         MIDDLEWARE_CLASSES=()
     )
-
-from django_nose import NoseTestSuiteRunner
 
 
 def runtests(*test_labels):
