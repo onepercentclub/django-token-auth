@@ -3,9 +3,6 @@ import sys
 
 from django.conf import settings
 
-from django_nose import NoseTestSuiteRunner
-
-
 if not settings.configured:
     settings.configure(
         DATABASES={'default': {'ENGINE': 'django.db.backends.sqlite3'}},
@@ -20,6 +17,8 @@ if not settings.configured:
         ),
         MIDDLEWARE_CLASSES=()
     )
+
+from django_nose import NoseTestSuiteRunner
 
 
 def runtests(*test_labels):
