@@ -2,7 +2,7 @@ import urllib
 
 from django.http.response import HttpResponseRedirect, HttpResponse
 from django.views.generic.base import View, TemplateView
-from django.utils.module_loading import import_by_path
+from django.utils.module_loading import import_string
 from django.core.exceptions import ImproperlyConfigured
 
 from token_auth.exceptions import TokenAuthenticationError
@@ -17,7 +17,7 @@ def get_auth(request, **kwargs):
         raise ImproperlyConfigured('TokenAuth backend not set')
 
     try:
-        cls = import_by_path(backend)
+        cls = import_string(backend)
     except AttributeError:
         raise ImproperlyConfigured(
             'TokenAuth backend {} is not defined'.format(backend)

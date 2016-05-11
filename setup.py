@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 import os
 import setuptools
 import token_auth
@@ -20,15 +21,16 @@ setuptools.setup(
     author="1%Club Developers",
     author_email="devteam@onepercentclub.com",
     install_requires=[
-        'Django==1.6.8',
+        'Django>=1.6.8',
+        'pycrypto>=2.6.1',
         'python-saml==2.1.4'
     ],
-    tests_require=[
-        'django_nose==1.4',
+    tests_require={
+        'django_nose>=1.4',
         'factory-boy==2.3.1',
-        'pycrypto==2.6.1',
+        'django-setuptest==0.1.4',
         'mock==1.0.1',
-    ],
+    },
     test_suite="token_auth.runtests.runtests",
     classifiers=[
         'Environment :: Web Environment',
