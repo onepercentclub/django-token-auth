@@ -21,25 +21,17 @@ setuptools.setup(
     author="1%Club Developers",
     author_email="devteam@onepercentclub.com",
     install_requires=[
-        'Django==1.6.8',
+        'Django>=1.6.8',
         'python-saml==2.1.4'
     ],
-    tests_require=[
-        'django_nose>=1.4',
-        'factory-boy>=2.3.1',
-        'pycrypto>=2.6.1',
+    tests_require={
+        'factory-boy>=2.6.0',
+        'bunch==1.0.1',
+        'django-nose>=1.4',
+        'django-setuptest>=0.1.4',
         'mock>=1.0.1',
-    ],
-    test_suite="token_auth.runtests.runtests",
-    classifiers=[
-        'Environment :: Web Environment',
-        'Framework :: Django',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: None',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python',
-        'Topic :: Internet :: WWW/HTTP',
-        'Topic :: Internet :: WWW/HTTP :: Dynamic Content'
-    ]
+        'djangorestframework>=2.3.14'
+    },
+    test_suite = "token_auth.runtests.runtests"
 )
 

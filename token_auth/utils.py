@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.utils.module_loading import import_by_path
+from django.utils.module_loading import import_string
 
 from django.core.exceptions import ImproperlyConfigured
 
@@ -10,7 +10,7 @@ def get_settings():
                               'django.conf.settings')
 
     try:
-        properties = import_by_path(properties_path)
+        properties = import_string(properties_path)
     except ImportError, e:
         raise ImproperlyConfigured(e)
 
