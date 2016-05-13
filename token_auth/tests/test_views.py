@@ -1,7 +1,7 @@
 import urllib
 from mock import patch
-
-from django.test import TestCase, RequestFactory
+from django.test import RequestFactory
+from django.test.testcases import SimpleTestCase
 from django.core.exceptions import ImproperlyConfigured
 
 from token_auth.auth import booking, base
@@ -25,7 +25,7 @@ class DummyAuthentication(base.BaseTokenAuthentication):
         return DummyUser(), True
 
 
-class ConfigureAuthenticationClassTestCase(TestCase):
+class ConfigureAuthenticationClassSimpleTestCase(SimpleTestCase):
     """
     Tests the configuration of the authentication backend
     """
@@ -46,7 +46,7 @@ class ConfigureAuthenticationClassTestCase(TestCase):
             )
 
 
-class RedirectViewTestCase(TestCase):
+class RedirectViewSimpleTestCase(SimpleTestCase):
     def setUp(self):
         self.view = TokenRedirectView()
         self.factory = RequestFactory()
@@ -73,7 +73,7 @@ class RedirectViewTestCase(TestCase):
             self.assertEqual(response.url, 'http://example.com/sso')
 
 
-class LoginViewTestCase(TestCase):
+class LoginViewSimpleTestCase(SimpleTestCase):
     def setUp(self):
         self.view = TokenLoginView()
         self.factory = RequestFactory()

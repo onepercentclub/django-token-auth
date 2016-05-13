@@ -28,7 +28,7 @@ setuptools.setup(
     ],
     tests_require={
         'django_nose>=1.4',
-        'factory-boy>=2.3.1',
+        'factory-boy==2.3.1',
         'django-setuptest==0.1.4',
         'mock==1.0.1',
     },

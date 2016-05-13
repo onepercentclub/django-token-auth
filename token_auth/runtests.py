@@ -15,7 +15,7 @@ def runtests(args=None):
 
     settings.configure(
         DATABASES={'default': {'ENGINE': 'django.db.backends.sqlite3'}},
-        USER_AUTH_MODEL='tests.User',
+        USER_AUTH_MODEL='tests.TestUser',
         USE_TZ=True,
         INSTALLED_APPS=(
             'django.contrib.auth',
