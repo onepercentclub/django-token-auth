@@ -10,7 +10,7 @@ class TestBaseTokenAuthentication(TestCase):
     Tests the Base Token Authentication backend.
     """
     def setUp(self):
-        with self.settings(TOKEN_AUTH={}, AUTH_USER_MODEL='tests.User'):
+        with self.settings(TOKEN_AUTH={}, AUTH_USER_MODEL='tests.TestUser'):
             self.auth = BaseTokenAuthentication(None)
 
     @patch.object(
@@ -21,7 +21,7 @@ class TestBaseTokenAuthentication(TestCase):
         """ When the user is succesfully authenticated, a new user should
         be created
         """
-        with self.settings(TOKEN_AUTH={}, AUTH_USER_MODEL='tests.User'):
+        with self.settings(TOKEN_AUTH={}, AUTH_USER_MODEL='tests.TestUser'):
             user, created = self.auth.authenticate()
 
             self.assertEqual(authenticate_request.call_count, 1)
@@ -33,7 +33,7 @@ class TestBaseTokenAuthentication(TestCase):
                                                                        'email': 'test@example.com'}
     )
     def test_user_already_exists(self, authenticate_request):
-        with self.settings(TOKEN_AUTH={}, AUTH_USER_MODEL='tests.User'):
+        with self.settings(TOKEN_AUTH={}, AUTH_USER_MODEL='tests.TestUser'):
             get_user_model()(remote_id='test@example.com', email='test@example.com').save()
 
             user, created = self.auth.authenticate()
@@ -48,7 +48,7 @@ class TestBaseTokenAuthentication(TestCase):
         return_value={'remote_id': 'test@example.com', 'email': 'test@example.com', 'first_name': 'updated'}
     )
     def test_user_already_exists_attributes_updated(self, authenticate_request):
-        with self.settings(TOKEN_AUTH={}, AUTH_USER_MODEL='tests.User'):
+        with self.settings(TOKEN_AUTH={}, AUTH_USER_MODEL='tests.TestUser'):
             get_user_model()(remote_id='test@example.com', email='test@example.com', first_name='test').save()
 
             user, created = self.auth.authenticate()
