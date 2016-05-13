@@ -13,4 +13,4 @@ class User(AbstractBaseUser):
     last_name = models.CharField(max_length=50)
     remote_id = models.CharField(_('remote_id'), max_length=75, blank=True, null=True)
 
-token_auth.models.TestUser = User
+token_auth.models.User = User

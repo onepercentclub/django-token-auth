@@ -31,7 +31,7 @@ class TestBookingTokenAuthentication(TestCase):
     Tests the Token Authentication backend.
     """
     def setUp(self):
-        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS, AUTH_USER_MODEL='tests.TestUser'):
+        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS, AUTH_USER_MODEL='tests.User'):
             self.request = RequestFactory().get('/api/sso/redirect')
 
             # To keep things easy, let's just change the valid token to put some Xs
@@ -236,7 +236,7 @@ class TestBookingTokenAuthentication(TestCase):
         """
         Tests ``authenticate`` method when it performs a successful login.
         """
-        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS, AUTH_USER_MODEL='tests.TestUser'):
+        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS, AUTH_USER_MODEL='tests.User'):
             timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             message = 'time={0}|username=johndoe|name=John Doe|' \
                       'email=john.doe@example.com'.format(timestamp)
@@ -261,7 +261,7 @@ class TestBookingTokenAuthentication(TestCase):
         Test the login view for booking
         """
         with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS, ROOT_URLCONF='token_auth.urls',
-                           AUTH_USER_MODEL='tests.TestUser'):
+                           AUTH_USER_MODEL='tests.User'):
             timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             message = 'time={0}|username=johndoe|name=John Doe|' \
                       'email=john.doe@example.com'.format(timestamp)
@@ -282,7 +282,7 @@ class TestBookingTokenAuthentication(TestCase):
         Test the link view for booking
         """
         with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS, ROOT_URLCONF='token_auth.urls',
-                           AUTH_USER_MODEL='tests.TestUser'):
+                           AUTH_USER_MODEL='tests.User'):
             timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             message = 'time={0}|username=johndoe|name=John Doe|' \
                       'email=john.doe@example.com'.format(timestamp)
