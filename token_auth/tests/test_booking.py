@@ -5,8 +5,8 @@ from datetime import datetime, timedelta
 from Crypto.Cipher import AES
 from Crypto import Random
 import mock
-from django.test.testcases import TestCase
 
+from django.test.testcases import TestCase
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.test import RequestFactory
@@ -274,7 +274,7 @@ class TestBookingTokenAuthentication(TestCase):
             self.assertEqual(response.status_code, 302)
             self.assertEqual(
                 response['Location'],
-                "http://testserver/login-with/tralala"
+                "/login-with/tralala"
             )
 
     @mock.patch.object(get_user_model(), 'get_jwt_token', create=True, return_value='tralala')
@@ -295,7 +295,7 @@ class TestBookingTokenAuthentication(TestCase):
             self.assertEqual(response.status_code, 302)
             self.assertEqual(
                 response['Location'],
-                "http://testserver/login-with/tralala?next=%2Fprojects%2Fmy-project"
+                "/login-with/tralala?next=%2Fprojects%2Fmy-project"
             )
 
     def test_redirect_view(self):

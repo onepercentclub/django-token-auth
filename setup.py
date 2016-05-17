@@ -9,7 +9,6 @@ with open(os.path.join(os.path.dirname(__file__), 'README.md')) as readme:
 
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
-
 setuptools.setup(
     name="django-token-auth",
     version=token_auth.__version__,
@@ -32,7 +31,7 @@ setuptools.setup(
         'django-setuptest==0.1.4',
         'mock==1.0.1',
     },
-    test_suite = "token_auth.runtests.runtests",
+    test_suite="token_auth.runtests.runtests",
     classifiers=[
         'Environment :: Web Environment',
         'Framework :: Django',
@@ -44,5 +43,3 @@ setuptools.setup(
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content'
     ]
 )
-
-
