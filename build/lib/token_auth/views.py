@@ -2,12 +2,8 @@ import urllib
 
 from django.http.response import HttpResponseRedirect, HttpResponse
 from django.views.generic.base import View, TemplateView
+from django.utils.module_loading import import_string
 from django.core.exceptions import ImproperlyConfigured
-
-try:
-    from django.utils.module_loading import import_string
-except ImportError:
-    from django.utils.module_loading import import_by_path as import_string
 
 from token_auth.exceptions import TokenAuthenticationError
 from token_auth.utils import get_settings

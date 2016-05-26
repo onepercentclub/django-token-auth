@@ -7,8 +7,8 @@ python:
 - '2.7.9'
 env:
   matrix:
-  - DJANGO=django==1.6.8"
-  - DJANGO=django==1.9.6"
+  - DJANGO=django==1.6.8
+  - DJANGO=django==1.9.6
 addons:
   apt:
     packages:
@@ -20,6 +20,7 @@ addons:
 install:
 - pip install --upgrade setuptools pip --use-mirrors
 - pip install flake8 lxml
+- pip install Django==$DJANGO
 - pip install -e .[test] --process-dependency-links
 before_script:
     flake8 .

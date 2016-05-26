@@ -1,9 +1,5 @@
 from django.conf import settings
-try:
-    from django.utils.module_loading import import_string
-except ImportError:
-    from django.utils.module_loading import import_by_path as import_string
-
+from django.utils.module_loading import import_string
 
 from django.core.exceptions import ImproperlyConfigured
 
