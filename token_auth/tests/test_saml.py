@@ -3,6 +3,8 @@ import os
 
 from mock import patch
 from django.test import TestCase, RequestFactory
+from onelogin.saml2.utils import OneLogin_Saml2_Utils
+import xml.etree.ElementTree as ET
 
 from token_auth.exceptions import TokenAuthenticationError
 from token_auth.auth.saml import SAMLAuthentication
@@ -191,3 +193,25 @@ class TestSAMLTokenAuthentication(TestCase):
                 'Saml login error: SAML Response not found, '
                 'Only supported HTTP_POST Binding'
             ))
+
+    def test_saml_request_omits_name_id_policy(self):
+        # Make sure NameIDPolicy doesn't show up in SAMLReuqest
+        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS, AUTH_USER_MODEL='tests.TestUser'):
+            request = RequestFactory().get('/sso/redirect', HTTP_HOST='www.stuff.com')
+            auth_backend = SAMLAuthentication(request)
+
+            sso_url = urlparse.urlparse(auth_backend.sso_url())
+            query = urlparse.parse_qs(sso_url.query)
+            self.assertEqual(
+                urlparse.urlunparse((
+                    sso_url.scheme, sso_url.netloc, sso_url.path, None, None, None)
+                ),
+                TOKEN_AUTH_SETTINGS['idp']['singleSignOnService']['url']
+            )
+            saml_request = query['SAMLRequest'][0]
+            saml_xml = OneLogin_Saml2_Utils.decode_base64_and_inflate(saml_request)
+            pre = {'samlp': "urn:oasis:names:tc:SAML:2.0:protocol"}
+            tree = ET.fromstring(saml_xml)
+            nip = tree.findall('samlp:NameIDPolicy', pre)
+
+            self.assertEqual(len(nip), 0)

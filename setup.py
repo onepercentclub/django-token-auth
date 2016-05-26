@@ -21,7 +21,7 @@ setuptools.setup(
     author_email="devteam@onepercentclub.com",
     install_requires=[
         'Django==1.6.8',
-        'python-saml==2.1.4'
+        'python-saml==2.1.7'
     ],
     tests_require=[
         'django_nose==1.4',
