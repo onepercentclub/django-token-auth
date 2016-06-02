@@ -38,11 +38,11 @@ class SAMLAuthentication(BaseTokenAuthentication):
 
     def __init__(self, request, **kwargs):
         super(SAMLAuthentication, self).__init__(request, **kwargs)
-        self.auth = OneLogin_Saml2_Auth(get_saml_request(request),
-                                        self.settings)
+        self.auth = OneLogin_Saml2_Auth(get_saml_request(request), self.settings)
 
     def sso_url(self, target_url=None):
-        return self.auth.login(return_to=target_url)
+        return self.auth.login(return_to=target_url,
+                               set_nameid_policy=False)
 
     @property
     def target_url(self):
