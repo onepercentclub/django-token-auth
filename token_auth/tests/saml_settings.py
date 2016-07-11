@@ -44,6 +44,7 @@ TOKEN_AUTH_SETTINGS = {
     },
     "security": {
         "authnRequestsSigned": False,
+        "requestedAuthnContext": False,
         "wantAssertionsSigned": False,
         "signMetadata": False
     },
