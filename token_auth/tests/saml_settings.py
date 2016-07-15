@@ -113,7 +113,6 @@ TOKEN_AUTH2_SETTINGS = {
         )
     },
     "security": {
-        "authnRequestsSigned": False,
         "requestedAuthnContext": [
             "urn:oasis:names:tc:SAML:2.0:ac:classes:Password",
             "urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport",
@@ -123,8 +122,6 @@ TOKEN_AUTH2_SETTINGS = {
             "urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos"
         ],
         "requestedAuthnContextComparison": "minimal",
-        "wantAssertionsSigned": False,
-        "signMetadata": False
     },
     "contactPerson": {
         "technical": {

@@ -1,8 +1,9 @@
 import urlparse
 import os
-
 from mock import patch
+
 from django.test import TestCase, RequestFactory
+
 from onelogin.saml2.utils import OneLogin_Saml2_Utils
 import xml.etree.ElementTree as ET
 
@@ -151,7 +152,6 @@ class TestSAMLTokenAuthentication(TestCase):
 
             self.assertEqual(len(nip), 0)
 
-
     def test_saml_request_omits_authentication_context(self):
         # Make sure RequestedAuthnContext doesn't show up in SAMLReuqest
         with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS, AUTH_USER_MODEL='tests.TestUser'):
@@ -172,7 +172,6 @@ class TestSAMLTokenAuthentication(TestCase):
             tree = ET.fromstring(saml_xml)
             rac = tree.findall('samlp:RequestedAuthnContext', pre)
             self.assertEqual(len(rac), 0)
-
 
     def test_saml_request_sets_authentication_context(self):
         # Make sure RequestedAuthnContext has right property in SAMLReuqest
