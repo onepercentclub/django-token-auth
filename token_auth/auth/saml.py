@@ -81,6 +81,7 @@ class SAMLAuthentication(BaseTokenAuthentication):
 
         if self.auth.is_authenticated():
             user_data = self.auth.get_attributes()
+            user_data['nameId'] = [self.auth.get_nameid()]
 
             return self.parse_user(user_data)
         else:

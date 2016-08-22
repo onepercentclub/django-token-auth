@@ -68,6 +68,7 @@ class TestSAMLTokenAuthentication(TestCase):
 
             self.assertEqual(user.username, 'smartin')
             self.assertEqual(user.email, 'smartin@yaco.es')
+            self.assertEqual(user.remote_id, '492882615acf31c8096b627245d76ae53036c090')
 
     def test_auth_custom_target(self):
         with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS, AUTH_USER_MODEL='tests.TestUser'):
