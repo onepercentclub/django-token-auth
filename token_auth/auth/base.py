@@ -34,19 +34,20 @@ class BaseTokenAuthentication(object):
         """
         raise NotImplemented()
 
-    def get_user_data(self, user, data):
+    def get_user_data(self, data):
         """
         Set al user data that we got from the SSO service and store it
         on the user.
         """
-        return dict([(key, value) for key, value in data.items if hasattr(user, key)])
+        user_model = get_user_model()()
+        return dict([(key, value) for key, value in data.items() if hasattr(user_model, key)])
 
     def get_or_create_user(self, data):
         """
         Get or create the user.
         """
         user_data = self.get_user_data(data)
-        return get_user_model().objects.get_or_create(
+        return get_user_model().objects.update_or_create(
             remote_id=data['remote_id'], defaults=user_data
         )
 
