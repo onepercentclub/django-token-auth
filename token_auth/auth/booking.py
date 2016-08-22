@@ -8,6 +8,8 @@ from datetime import timedelta
 import string
 from datetime import datetime
 
+from django.utils.dateparse import parse_datetime
+from django.utils import timezone
 from Crypto import Random
 from Crypto.Cipher import AES
 
@@ -187,5 +189,7 @@ class TokenAuthentication(BaseTokenAuthentication):
         return data
 
     def finalize(self, user, data):
+        timestamp = timezone.make_aware(parse_datetime(data['timestamp']))
+
         CheckedToken.objects.create(token=self.args['token'], user=user,
-                                    timestamp=data['timestamp']).save()
+                                    timestamp=timestamp).save()
