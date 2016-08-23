@@ -120,13 +120,6 @@ class TokenAuthentication(BaseTokenAuthentication):
             # Token was not used previously. Continue with auth process.
             pass
 
-    def set_user_data(self, user, data):
-        for field in data:
-            if hasattr(user, field):
-                setattr(user, field, data[field])
-        user.save()
-        return user
-
     def decrypt_message(self):
         """
         Decrypts the AES encoded message.

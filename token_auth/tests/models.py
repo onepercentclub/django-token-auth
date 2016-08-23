@@ -10,3 +10,4 @@ class TestUser(AbstractBaseUser):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     remote_id = models.CharField(_('remote_id'), max_length=75, blank=True, null=True)
+    is_active = models.BooleanField('is active', null=True)

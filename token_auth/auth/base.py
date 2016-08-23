@@ -34,22 +34,22 @@ class BaseTokenAuthentication(object):
         """
         raise NotImplemented()
 
-    def set_user_data(self, user, data):
+    def get_user_data(self, data):
         """
         Set al user data that we got from the SSO service and store it
         on the user.
         """
-        for key, value in data.items():
-            if hasattr(user, key):
-                setattr(user, key, value)
-        user.save()
-        return user
+        user_model = get_user_model()()
+        return dict([(key, value) for key, value in data.items() if hasattr(user_model, key)])
 
     def get_or_create_user(self, data):
         """
         Get or create the user.
         """
-        return get_user_model().objects.get_or_create(remote_id=data['remote_id'])
+        user_data = self.get_user_data(data)
+        return get_user_model().objects.update_or_create(
+            remote_id=data['remote_id'], defaults=user_data
+        )
 
     def finalize(self, user, data):
         """
@@ -69,11 +69,9 @@ class BaseTokenAuthentication(object):
 
     def authenticate(self):
         data = self.authenticate_request()
+        data['is_active'] = True
 
         user, created = self.get_or_create_user(data)
-        user.is_active = True
-        user = self.set_user_data(user, data)
-
         self.finalize(user, data)
 
         return user, created
