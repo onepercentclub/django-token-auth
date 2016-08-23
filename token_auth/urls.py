@@ -4,7 +4,6 @@ from token_auth.views import MetadataView, TokenLogoutView
 from .views import TokenRedirectView, TokenLoginView, TokenErrorView, MembersOnlyView
 
 urlpatterns = [
-    '',
     url(r'^redirect/$', TokenRedirectView.as_view(),
         name='token-redirect'),
     url(r'^login/(?P<token>.*?)$', TokenLoginView.as_view(),
