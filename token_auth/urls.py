@@ -1,9 +1,9 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 from token_auth.views import MetadataView, TokenLogoutView
 
 from .views import TokenRedirectView, TokenLoginView, TokenErrorView, MembersOnlyView
 
-urlpatterns = patterns(
+urlpatterns = [
     '',
     url(r'^redirect/$', TokenRedirectView.as_view(),
         name='token-redirect'),
@@ -15,4 +15,4 @@ urlpatterns = patterns(
     url(r'^error/$', TokenErrorView.as_view(), name='token-error'),
     url(r'^missing/$', MembersOnlyView.as_view(), name='members-only'),
     url(r'^metadata/$', MetadataView.as_view(), name='token-metadata'),
-)
+]
