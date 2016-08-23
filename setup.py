@@ -23,7 +23,8 @@ setuptools.setup(
     install_requires=[
         'Django>=1.6.8',
         'pycrypto>=2.6.1',
-        'python-saml==2.1.7'
+        'python-saml==2.1.7',
+        'lxml==3.6.1'
     ],
     tests_require={
         'django_nose>=1.4',
