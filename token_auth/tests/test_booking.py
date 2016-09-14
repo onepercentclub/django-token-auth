@@ -85,6 +85,13 @@ class TestBookingTokenAuthentication(TestCase):
                 TOKEN_AUTH_SETTINGS['sso_url'] + '?url=%2Ftest%2F'
             )
 
+    def test_sso_url_custom_target_unicode(self):
+        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS):
+            self.assertEqual(
+                self.auth_backend.sso_url(target_url=u'/test/\u2026/bla'),
+                TOKEN_AUTH_SETTINGS['sso_url'] + '?url=%2Ftest%2F%E2%80%A6%2Fbla'
+            )
+
     def test_check_hmac_signature_ok(self):
         """
         Tests that the method to check up HMAC signature of the token message

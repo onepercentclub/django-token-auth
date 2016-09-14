@@ -170,7 +170,7 @@ class TokenAuthentication(BaseTokenAuthentication):
     def sso_url(self, target_url=None):
         url = self.settings['sso_url']
         if target_url:
-            url += '?{}'.format(urllib.urlencode({'url': target_url}))
+            url += '?{}'.format(urllib.urlencode({'url': target_url.encode('utf-8')}))
 
         return url
 
