@@ -1,4 +1,4 @@
-VERSION = (0, 3, 2, 'final')
+VERSION = (0, 3, 3, 'final')
 
 
 def get_version():
@@ -11,5 +11,6 @@ def get_version():
         else:
             version = '%s%s' % (version, VERSION[3][0])
     return version
+
 
 __version__ = get_version()

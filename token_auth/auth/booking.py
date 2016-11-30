@@ -39,7 +39,7 @@ def _encode_message(message):
     cipher = AES.new(aes_key, AES.MODE_CBC, init_vector)
     padded_message = pad(message)
     aes_message = init_vector + cipher.encrypt(padded_message)
-    hmac_digest = hmac.new(hmac_key, aes_message, hashlib.sha1)
+    hmac_digest = hmac.new(str(hmac_key), str(aes_message), hashlib.sha1)
 
     return aes_message, hmac_digest
 
@@ -81,7 +81,7 @@ class TokenAuthentication(BaseTokenAuthentication):
         """
         data = message[:-20]
         checksum = message[-20:]
-        hmac_data = hmac.new(self.settings['hmac_key'], data, hashlib.sha1)
+        hmac_data = hmac.new(str(self.settings['hmac_key']), str(data), hashlib.sha1)
 
         return True if hmac_data.digest() == checksum else False
 

@@ -11,4 +11,5 @@ class LoginTokenAdmin(admin.ModelAdmin):
 
     short_token.allow_tags = True
 
+
 admin.site.register(CheckedToken, LoginTokenAdmin)
