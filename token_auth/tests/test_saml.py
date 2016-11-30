@@ -1,13 +1,15 @@
 import urlparse
 import os
-
 from mock import patch
+
 from django.test import TestCase, RequestFactory
+
 from onelogin.saml2.utils import OneLogin_Saml2_Utils
 import xml.etree.ElementTree as ET
 
 from token_auth.exceptions import TokenAuthenticationError
 from token_auth.auth.saml import SAMLAuthentication
+from token_auth.tests.saml_settings import TOKEN_AUTH2_SETTINGS
 
 from .saml_settings import TOKEN_AUTH_SETTINGS
 
@@ -149,3 +151,49 @@ class TestSAMLTokenAuthentication(TestCase):
             nip = tree.findall('samlp:NameIDPolicy', pre)
 
             self.assertEqual(len(nip), 0)
+
+    def test_saml_request_omits_authentication_context(self):
+        # Make sure RequestedAuthnContext doesn't show up in SAMLReuqest
+        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS, AUTH_USER_MODEL='tests.TestUser'):
+            request = RequestFactory().get('/sso/redirect', HTTP_HOST='www.stuff.com')
+            auth_backend = SAMLAuthentication(request)
+
+            sso_url = urlparse.urlparse(auth_backend.sso_url())
+            query = urlparse.parse_qs(sso_url.query)
+            self.assertEqual(
+                urlparse.urlunparse((
+                    sso_url.scheme, sso_url.netloc, sso_url.path, None, None, None)
+                ),
+                TOKEN_AUTH_SETTINGS['idp']['singleSignOnService']['url']
+            )
+            saml_request = query['SAMLRequest'][0]
+            saml_xml = OneLogin_Saml2_Utils.decode_base64_and_inflate(saml_request)
+            pre = {'samlp': "urn:oasis:names:tc:SAML:2.0:protocol"}
+            tree = ET.fromstring(saml_xml)
+            rac = tree.findall('samlp:RequestedAuthnContext', pre)
+            self.assertEqual(len(rac), 0)
+
+    def test_saml_request_sets_authentication_context(self):
+        # Make sure RequestedAuthnContext has right property in SAMLReuqest
+        with self.settings(TOKEN_AUTH=TOKEN_AUTH2_SETTINGS, AUTH_USER_MODEL='tests.TestUser'):
+            request = RequestFactory().get('/sso/redirect', HTTP_HOST='www.stuff.com')
+            auth_backend = SAMLAuthentication(request)
+
+            sso_url = urlparse.urlparse(auth_backend.sso_url())
+            query = urlparse.parse_qs(sso_url.query)
+            self.assertEqual(
+                urlparse.urlunparse((
+                    sso_url.scheme, sso_url.netloc, sso_url.path, None, None, None)
+                ),
+                TOKEN_AUTH_SETTINGS['idp']['singleSignOnService']['url']
+            )
+            saml_request = query['SAMLRequest'][0]
+            saml_xml = OneLogin_Saml2_Utils.decode_base64_and_inflate(saml_request)
+            pre = {'samlp': "urn:oasis:names:tc:SAML:2.0:protocol"}
+            tree = ET.fromstring(saml_xml)
+            rac = tree.findall('samlp:RequestedAuthnContext', pre)
+            self.assertEqual(len(rac), 1)
+            # Comparison property should be set to minimal
+            self.assertEqual(rac[0].attrib['Comparison'], "minimal")
+            # RequestedAuthnContext should have 6 options / children
+            self.assertEqual(len(rac[0]), 6)
