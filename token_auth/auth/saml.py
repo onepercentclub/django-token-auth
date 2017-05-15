@@ -49,7 +49,9 @@ class SAMLAuthentication(BaseTokenAuthentication):
         return self.request.POST.get('RelayState')
 
     def get_metadata(self):
+        base_path = self.settings.get('base_path', None)
         saml_settings = OneLogin_Saml2_Settings(settings=self.settings,
+                                                custom_base_path=base_path,
                                                 sp_validation_only=True)
         metadata = saml_settings.get_sp_metadata()
         errors = saml_settings.validate_metadata(metadata)
