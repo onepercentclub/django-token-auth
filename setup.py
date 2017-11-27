@@ -26,12 +26,12 @@ setuptools.setup(
         'python-saml==2.1.7',
         'lxml==3.6.1'
     ],
-    tests_require={
+    tests_require=[
         'django_nose>=1.4',
         'factory-boy==2.3.1',
         'django-setuptest==0.1.4',
         'mock==1.0.1',
-    },
+    ],
     test_suite="token_auth.runtests.runtests",
     classifiers=[
         'Environment :: Web Environment',
