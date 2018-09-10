@@ -47,9 +47,21 @@ class BaseTokenAuthentication(object):
         Get or create the user.
         """
         user_data = self.get_user_data(data)
-        return get_user_model().objects.update_or_create(
-            remote_id=data['remote_id'], defaults=user_data
-        )
+        user_model = get_user_model()
+        created = False
+        try:
+            user = user_model.objects.get(remote_id=data['remote_id'])
+        except user_model.DoesNotExist:
+            try:
+                user = user_model.objects.get(remote_id__iexact=data['remote_id'])
+                user.remote_id = data['remote_id']
+                user.save()
+            except user_model.DoesNotExist:
+                user = user_model.objects.create(remote_id=data['remote_id'])
+                created = True
+        user_model.objects.filter(remote_id=data['remote_id']).update(**user_data)
+        user.refresh_from_db()
+        return user, created
 
     def finalize(self, user, data):
         """
