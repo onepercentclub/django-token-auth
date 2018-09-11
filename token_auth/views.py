@@ -53,7 +53,7 @@ class TokenLoginView(View):
             url = '/token/error?message={0}'.format(e)
             return HttpResponseRedirect(url)
 
-        url = "/login-with/{0}".format(user.get_jwt_token())
+        url = "/login-with/{}/{}".format(user.pk, user.get_login_token())
 
         if link:
             url += '?{}'.format(urllib.urlencode({'next': link}))

@@ -14,7 +14,9 @@ DUMMY_AUTH = {'backend': 'token_auth.tests.test_views.DummyAuthentication'}
 
 
 class DummyUser(object):
-    def get_jwt_token(self):
+    pk = 1
+
+    def get_login_token(self):
         return 'test-token'
 
 
@@ -82,19 +84,21 @@ class LoginViewTestCase(TestCase):
 
     def test_get(self):
         response = self.view.get(self.factory.get('/api/sso/authenticate'))
+        user = DummyUser()
 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(
-            response['Location'], '/login-with/{}'.format(DummyUser().get_jwt_token())
+            response['Location'], '/login-with/{}/{}'.format(user.pk, user.get_login_token())
         )
 
     def test_get_link(self):
         response = self.view.get(self.factory.get('/api/sso/authenticate'), link='/test')
+        user = DummyUser()
 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(
             response['Location'],
-            '/login-with/{}?next=%2Ftest'.format(DummyUser().get_jwt_token())
+            '/login-with/{}/{}?next=%2Ftest'.format(user.pk, user.get_login_token())
         )
 
     def test_get_authentication_failed(self):
