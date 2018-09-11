@@ -9,6 +9,7 @@ import xml.etree.ElementTree as ET
 
 from token_auth.exceptions import TokenAuthenticationError
 from token_auth.auth.saml import SAMLAuthentication
+from token_auth.tests.factories import UserFactory
 from token_auth.tests.saml_settings import TOKEN_AUTH2_SETTINGS
 
 from .saml_settings import TOKEN_AUTH_SETTINGS
@@ -68,6 +69,29 @@ class TestSAMLTokenAuthentication(TestCase):
 
             self.assertTrue(created)
 
+            self.assertEqual(user.username, 'smartin')
+            self.assertEqual(user.email, 'smartin@yaco.es')
+            self.assertEqual(user.remote_id, '492882615acf31c8096b627245d76ae53036c090')
+
+    def test_auth_existing_succes(self):
+        with self.settings(TOKEN_AUTH=TOKEN_AUTH_SETTINGS, AUTH_USER_MODEL='tests.TestUser'):
+            # Create user with remote_id with caps
+            UserFactory.create(remote_id='492882615ACF31C8096B627245D76AE53036C090',
+                               email='smartin@yaco.es',
+                               username='smartin')
+
+            filename = os.path.join(
+                os.path.dirname(__file__), 'data/valid_response.xml.base64'
+            )
+            with open(filename) as response_file:
+                response = response_file.read()
+
+            request = RequestFactory().post('/sso/auth', HTTP_HOST='www.stuff.com', data={'SAMLResponse': response})
+            auth_backend = SAMLAuthentication(request)
+
+            # Login should stil work.
+            user, created = auth_backend.authenticate()
+            self.assertFalse(created)
             self.assertEqual(user.username, 'smartin')
             self.assertEqual(user.email, 'smartin@yaco.es')
             self.assertEqual(user.remote_id, '492882615acf31c8096b627245d76ae53036c090')
