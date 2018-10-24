@@ -263,7 +263,7 @@ class TestBookingTokenAuthentication(TestCase):
             self.assertEqual(checked_token.token, token)
             self.assertEqual(checked_token.user.username, user.username)
 
-    @mock.patch.object(get_user_model(), 'get_jwt_token', create=True, return_value='tralala')
+    @mock.patch.object(get_user_model(), 'get_login_token', create=True, return_value='tralala')
     def test_login_view(self, get_jwt_token):
         """
         Test the login view for booking
@@ -281,10 +281,10 @@ class TestBookingTokenAuthentication(TestCase):
             self.assertEqual(response.status_code, 302)
             self.assertEqual(
                 response['Location'],
-                "/login-with/tralala"
+                "/login-with/2/tralala"
             )
 
-    @mock.patch.object(get_user_model(), 'get_jwt_token', create=True, return_value='tralala')
+    @mock.patch.object(get_user_model(), 'get_login_token', create=True, return_value='tralala')
     def test_link_view(self, get_jwt_token):
         """
         Test the link view for booking
@@ -302,7 +302,7 @@ class TestBookingTokenAuthentication(TestCase):
             self.assertEqual(response.status_code, 302)
             self.assertEqual(
                 response['Location'],
-                "/login-with/tralala?next=%2Fprojects%2Fmy-project"
+                "/login-with/2/tralala?next=%2Fprojects%2Fmy-project"
             )
 
     def test_redirect_view(self):
