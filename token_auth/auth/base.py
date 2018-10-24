@@ -18,7 +18,7 @@ class BaseTokenAuthentication(object):
         self.settings = get_settings()
 
     def sso_url(self, target_url=None):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     @property
     def target_url(self):
@@ -32,7 +32,7 @@ class BaseTokenAuthentication(object):
         Typically it should at least have an <email>.
         {'email': <email>}
         """
-        raise NotImplemented()
+        raise NotImplementedError()
 
     def get_user_data(self, data):
         """
@@ -77,7 +77,7 @@ class BaseTokenAuthentication(object):
         pass
 
     def get_metadata(self):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     def authenticate(self):
         data = self.authenticate_request()
